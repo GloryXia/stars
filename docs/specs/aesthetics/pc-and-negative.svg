@@ -1,0 +1,209 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 510" width="1120" height="510" font-family="PingFang SC, Noto Sans SC, sans-serif">
+  <defs>
+    <radialGradient id="rimPC" r="0.5">
+      <stop offset="0.80" stop-color="#6FE3FF" stop-opacity="0.02"/>
+      <stop offset="0.97" stop-color="#6FE3FF" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#6FE3FF" stop-opacity="0.85"/>
+    </radialGradient>
+    <clipPath id="pcFrame"><rect width="500" height="390" rx="10"/></clipPath>
+    <clipPath id="negFrame"><rect width="500" height="390" rx="10"/></clipPath>
+  </defs>
+  <style>
+    .t { fill:#E6EEF7; font-size:15px; font-weight:600; letter-spacing:1px; }
+    .lab { fill:#9AA9BA; font-size:11px; }
+    .lab3 { fill:#5C6B7D; font-size:10px; }
+    .ink { fill:#E6EEF7; }
+    .mono { font-family:JetBrains Mono, SFMono-Regular, Menlo, monospace; }
+    .serif { font-family:Noto Serif SC, Source Han Serif SC, Songti SC, serif; }
+    .rule { stroke:#24344A; fill:none; }
+  </style>
+  <rect width="1120" height="510" fill="#020305"/>
+  <text x="40" y="34" class="t">① PC 宽屏 · 正式实时对局（右侧停靠详情 + 键盘焦点）</text>
+  <text x="580" y="34" class="t">② 显影模式 · M4 纪元结算回放（玻璃底片反相 + 回放时间轴）</text>
+
+  <!-- ================= 左：PC 宽屏 ================= -->
+  <g transform="translate(40,56)">
+    <g clip-path="url(#pcFrame)">
+      <rect width="500" height="390" fill="#05070B"/>
+
+      <!-- 星图区域（左 315px） -->
+      <g transform="translate(158,210)">
+        <ellipse rx="52" ry="18" class="rule"/>
+        <ellipse rx="104" ry="36" class="rule"/>
+        <ellipse rx="146" ry="50" class="rule" stroke-dasharray="2 4"/>
+        <line x1="-146" y1="0" x2="146" y2="0" class="rule" stroke-dasharray="2 4"/>
+      </g>
+      <!-- 背景星 + 落地线 -->
+      <g>
+        <line x1="60" y1="150" x2="60" y2="205" stroke="#24344A"/><circle cx="60" cy="150" r="1.5" fill="#FFDDB4"/>
+        <line x1="258" y1="145" x2="258" y2="195" stroke="#24344A"/><circle cx="258" cy="145" r="1.4" fill="#CAD8FF"/>
+        <line x1="94" y1="268" x2="94" y2="225" stroke="#24344A"/><circle cx="94" cy="268" r="1.2" fill="#FFF4E8"/>
+        <circle cx="40" cy="112" r="1" fill="#FFF4E8"/><circle cx="288" cy="296" r="1.1" fill="#FFBD6F"/>
+        <circle cx="195" cy="96" r="1" fill="#FBF8FF"/><circle cx="52" cy="316" r="1.1" fill="#AABFFF"/>
+      </g>
+      <!-- 包络与节点 -->
+      <circle cx="158" cy="210" r="118" fill="none" stroke="#EAF2FF" stroke-opacity="0.16"/>
+      <circle cx="158" cy="210" r="76" fill="none" stroke="#6FE3FF" stroke-opacity="0.5" stroke-dasharray="3 5"/>
+      <circle cx="158" cy="210" r="40" fill="url(#rimPC)"/>
+      <line x1="158" y1="210" x2="234" y2="210" stroke="#2C7F99" stroke-opacity="0.7" stroke-dasharray="1.5 4"/>
+      <g transform="translate(158,210)" stroke="#6FE3FF" stroke-width="1.3" fill="none">
+        <circle r="2.5" fill="#FFF4E8" stroke="none"/><circle r="9"/>
+        <line x1="12" y1="0" x2="16" y2="0"/><line x1="-12" y1="0" x2="-16" y2="0"/>
+        <line x1="0" y1="12" x2="0" y2="16"/><line x1="0" y1="-12" x2="0" y2="-16"/>
+      </g>
+      <g transform="translate(234,210)">
+        <circle r="2.5" fill="#FFDDB4"/>
+        <circle r="9" fill="none" stroke="#6FE3FF" stroke-width="1.3" stroke-dasharray="3 3"/>
+        <path d="M -15 -10 L -15 -15 L -10 -15 M 10 -15 L 15 -15 L 15 -10 M 15 10 L 15 15 L 10 15 M -10 15 L -15 15 L -15 10" fill="none" stroke="#E6EEF7" stroke-width="1.1"/>
+      </g>
+      <text x="148" y="236" class="lab">A</text>
+      <text x="230" y="236" class="lab">B</text>
+
+      <!-- 星图顶部栏 -->
+      <text x="14" y="24" class="lab3">E01 · 中密度 · 席位 A</text>
+      <text x="14" y="46" class="ink serif" font-size="16">天时 <tspan class="mono" font-size="14">20.9</tspan> 年</text>
+      <text x="128" y="46" class="lab mono" font-size="11">人时 31:21</text>
+      <rect x="14" y="60" width="124" height="24" rx="12" class="rule"/>
+      <rect x="76" y="62" width="60" height="20" rx="10" fill="#121A26"/>
+      <text x="45" y="76" text-anchor="middle" class="lab">天球仪</text>
+      <text x="106" y="76" text-anchor="middle" class="ink" font-size="11">星泡图</text>
+      <!-- SDI 环 -->
+      <g transform="translate(288,38)">
+        <circle r="13" class="rule" stroke-width="2.5"/>
+        <path d="M 0 -13 A 13 13 0 0 1 8.9 -9.5" fill="none" stroke="#2C7F99" stroke-width="2.5"/>
+        <text y="3.5" text-anchor="middle" class="ink mono" font-size="9">12</text>
+      </g>
+      <!-- 星图底部控制（正式实时对局：观测/隐匿模式 + 键位提示，无回放控件） -->
+      <text x="14" y="346" class="lab">已确认 <tspan class="ink mono">1</tspan>   可达 <tspan class="ink mono">0</tspan>   冗余 <tspan class="ink mono">1.00</tspan></text>
+      <rect x="14" y="357" width="66" height="22" rx="11" fill="#0A0F17" stroke="#364A66"/>
+      <circle cx="24" cy="368" r="2" fill="#6FE3FF"/>
+      <text x="50" y="371" text-anchor="middle" class="ink" font-size="10">观测·巡天</text>
+      <rect x="86" y="357" width="58" height="22" rx="11" fill="#0A0F17" stroke="#24344A"/>
+      <text x="115" y="371" text-anchor="middle" class="lab" font-size="10">隐匿·关</text>
+      <text x="156" y="371" class="lab3">Tab 焦点 · Esc 关闭</text>
+
+      <!-- 右侧停靠栏（宽 185px，对应 360pt 比例） -->
+      <rect x="315" y="0" width="185" height="390" fill="#0A0F17"/>
+      <line x1="315" y1="0" x2="315" y2="390" class="rule"/>
+
+      <!-- 横向对数尺度 -->
+      <text x="330" y="24" class="lab">包络半径</text>
+      <text x="486" y="24" text-anchor="end" class="ink mono" font-size="11">2.10 → 4.00 ly</text>
+      <line x1="330" y1="42" x2="486" y2="42" stroke="#24344A" stroke-width="3" stroke-linecap="round"/>
+      <line x1="330" y1="42" x2="440" y2="42" stroke="#6FE3FF" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="453" cy="42" r="4.5" fill="none" stroke="#6FE3FF" stroke-width="1.2" stroke-dasharray="2 2"/>
+      <circle cx="440" cy="42" r="6" fill="#0A0F17" stroke="#6FE3FF" stroke-width="1.8"/>
+      <text x="330" y="58" class="lab3 mono">0.01</text><text x="374" y="58" class="lab3 mono">0.1</text>
+      <text x="422" y="58" class="lab3 mono">1</text><text x="476" y="58" class="lab3 mono">20</text>
+      <line x1="330" y1="70" x2="486" y2="70" class="rule"/>
+
+      <!-- 节点详情 -->
+      <text x="330" y="96" class="ink serif" font-size="18">B</text>
+      <text x="348" y="95" class="lab">K 型主序星</text>
+      <rect x="424" y="81" width="46" height="18" rx="9" fill="none" stroke="#6FE3FF" stroke-dasharray="2.5 2.5"/>
+      <text x="447" y="93.5" text-anchor="middle" fill="#6FE3FF" font-size="10">待确认</text>
+      <text x="330" y="122" class="lab3">星表距离</text><text x="486" y="122" text-anchor="end" class="ink mono" font-size="12">4.00 ly</text>
+      <text x="330" y="142" class="lab3">单程光行</text><text x="486" y="142" text-anchor="end" class="ink mono" font-size="12">4.0 年 · 6:00</text>
+      <text x="330" y="162" class="lab3">最近光信</text><text x="486" y="162" text-anchor="end" class="lab3 mono">在途 · 尚无回执</text>
+      <text x="330" y="186" class="lab3" font-style="italic">你看到的 B，是它 4.0 年前的样子。</text>
+      <line x1="330" y1="202" x2="486" y2="202" class="rule"/>
+
+      <!-- MCP 副官胶囊 -->
+      <text x="330" y="222" class="lab">MCP 副官</text>
+      <rect x="330" y="232" width="156" height="40" rx="6" fill="#121A26" stroke="#24344A"/>
+      <circle cx="344" cy="246" r="3" fill="#4CF2A0"/>
+      <text x="354" y="250" class="ink" font-size="11">L2 已授权 · 只读</text>
+      <text x="342" y="264" class="lab3">最近读取：人时 31:20 · 同口径</text>
+
+      <!-- 键盘焦点主按钮 -->
+      <rect x="328" y="330" width="160" height="36" rx="18" fill="none" stroke="#6FE3FF" stroke-width="2"/>
+      <rect x="332" y="334" width="152" height="28" rx="14" fill="#6FE3FF" fill-opacity="0.10" stroke="#6FE3FF" stroke-width="1"/>
+      <text x="408" y="352" text-anchor="middle" fill="#6FE3FF" font-size="11.5">确认目标 → 4.00 光年</text>
+      <text x="408" y="380" text-anchor="middle" class="lab3">2 px 键盘焦点框</text>
+    </g>
+    <rect width="500" height="390" rx="10" fill="none" stroke="#24344A" stroke-width="1.5"/>
+  </g>
+
+  <!-- ================= 右：显影模式（玻璃底片） ================= -->
+  <g transform="translate(580,56)">
+    <g clip-path="url(#negFrame)">
+      <rect width="500" height="390" fill="#F4F6F8"/>
+
+      <!-- 极坐标线 -->
+      <g transform="translate(250,210)" stroke="#D5DCE4" fill="none">
+        <ellipse rx="70" ry="26"/>
+        <ellipse rx="140" ry="52"/>
+        <ellipse rx="210" ry="78" stroke-dasharray="2 4"/>
+        <line x1="-220" y1="0" x2="220" y2="0"/>
+        <line x1="0" y1="-90" x2="0" y2="90"/>
+      </g>
+
+      <!-- 当时视野蒙版（左上方扇区，对比信息差） -->
+      <path d="M 250 210 L 0 40 L 0 360 Z" fill="#0A0F17" fill-opacity="0.11"/>
+      <text x="20" y="340" fill="#5A6575" font-size="10">当时视野蒙版 · 席位 A 未观测扇区</text>
+
+      <!-- 黑色背景星与落地线 -->
+      <g fill="#11161F">
+        <line x1="90" y1="155" x2="90" y2="210" stroke="#BFC9D4"/><circle cx="90" cy="155" r="1.6"/>
+        <line x1="408" y1="142" x2="408" y2="195" stroke="#BFC9D4"/><circle cx="408" cy="142" r="1.8"/>
+        <line x1="366" y1="274" x2="366" y2="230" stroke="#BFC9D4"/><circle cx="366" cy="274" r="1.5"/>
+        <circle cx="194" cy="96" r="1.1"/><circle cx="450" cy="108" r="1.2"/><circle cx="442" cy="296" r="1.1"/>
+      </g>
+
+      <!-- 己方（底片黑墨） -->
+      <circle cx="250" cy="210" r="46" fill="#11161F" fill-opacity="0.04" stroke="#11161F" stroke-width="1.3"/>
+      <circle cx="250" cy="210" r="3" fill="#11161F"/>
+      <circle cx="250" cy="210" r="8" fill="none" stroke="#11161F"/>
+      <circle cx="294" cy="210" r="2.5" fill="#11161F"/>
+      <circle cx="294" cy="210" r="7" fill="none" stroke="#11161F"/>
+      <line x1="250" y1="210" x2="294" y2="210" stroke="#11161F" stroke-width="1.2"/>
+      <text x="250" y="232" text-anchor="middle" fill="#11161F" font-size="10">席位 A</text>
+
+      <!-- 未被发现的他者（在显影中露出全貌） -->
+      <circle cx="116" cy="146" r="32" fill="none" stroke="#5A6575" stroke-width="1.1"/>
+      <circle cx="116" cy="146" r="2.2" fill="#11161F"/>
+      <text x="116" y="106" text-anchor="middle" fill="#5A6575" font-size="10">潜伏微球（全知显影）</text>
+
+      <!-- 冻结的在途打击（铅笔虚线） -->
+      <line x1="120" y1="148" x2="206" y2="188" stroke="#5A6575" stroke-width="1.2" stroke-dasharray="4 4"/>
+      <path d="M 198 189 L 207 188.5 L 202 181" fill="none" stroke="#5A6575" stroke-width="1.2"/>
+      <text x="148" y="212" text-anchor="middle" fill="#5A6575" font-size="10">冻结在途 · 未抵达</text>
+
+      <!-- 唯一彩色：引力波星碑（gw 紫） -->
+      <g transform="translate(384,186)">
+        <circle r="22" fill="#6E46D6" fill-opacity="0.08"/>
+        <ellipse rx="18" ry="10" fill="none" stroke="#6E46D6" stroke-width="1.4"/>
+        <ellipse rx="10" ry="18" fill="none" stroke="#6E46D6" stroke-width="1.1" stroke-dasharray="2.5 3"/>
+        <circle r="2.5" fill="#6E46D6"/>
+        <text y="34" text-anchor="middle" fill="#6E46D6" font-size="10" font-weight="600">引力波星碑 · 跨纪元继承</text>
+      </g>
+
+      <!-- 顶部底片档案栏 -->
+      <rect x="0" y="0" width="500" height="58" fill="#F4F6F8" fill-opacity="0.92"/>
+      <line x1="0" y1="58" x2="500" y2="58" stroke="#D5DCE4"/>
+      <text x="18" y="24" fill="#5A6575" font-size="10">纪元结算 · 全知显影底片（反相）</text>
+      <text x="18" y="46" fill="#11161F" class="serif" font-size="16" font-weight="600">第一纪元 · 微光</text>
+      <text x="482" y="30" text-anchor="end" fill="#5A6575" class="mono" font-size="10">t_close 归档完成</text>
+      <rect x="372" y="36" width="110" height="16" rx="8" fill="none" stroke="#5A6575"/>
+      <text x="427" y="47" text-anchor="middle" fill="#11161F" font-size="9">叠加当时视野</text>
+
+      <!-- 底部回放控制与时间轴（M4 显影回放独占） -->
+      <rect x="0" y="352" width="500" height="38" fill="#F4F6F8" fill-opacity="0.92"/>
+      <line x1="0" y1="352" x2="500" y2="352" stroke="#D5DCE4"/>
+      <g fill="none" stroke="#11161F" stroke-width="1.2">
+        <circle cx="28" cy="371" r="10" stroke="#5A6575"/>
+        <line x1="25.5" y1="367" x2="25.5" y2="375"/><line x1="30.5" y1="367" x2="30.5" y2="375"/>
+        <circle cx="54" cy="371" r="10" stroke="#5A6575"/>
+        <path d="M50 367 L54 371 L50 375 M54 367 L58 371 L54 375"/>
+        <circle cx="80" cy="371" r="10" stroke="#5A6575"/>
+        <path d="M84 371 A 4 4 0 1 1 80 367 M80 364.5 L82.5 367 L80 369.5"/>
+      </g>
+      <text x="100" y="374" fill="#5A6575" class="mono" font-size="10">×10</text>
+      <line x1="130" y1="371" x2="426" y2="371" stroke="#D5DCE4" stroke-width="2"/>
+      <line x1="130" y1="371" x2="426" y2="371" stroke="#11161F" stroke-width="2" stroke-dasharray="1 18"/>
+      <circle cx="426" cy="371" r="4" fill="#11161F"/>
+      <text x="482" y="374" text-anchor="end" fill="#5A6575" class="mono" font-size="10">t_close</text>
+    </g>
+    <rect width="500" height="390" rx="10" fill="none" stroke="#24344A" stroke-width="1.5"/>
+  </g>
+</svg>

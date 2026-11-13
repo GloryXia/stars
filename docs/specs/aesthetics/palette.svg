@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1090 760" width="1090" height="760" font-family="PingFang SC, Noto Sans SC, sans-serif">
+  <rect width="1090" height="760" fill="#05070B"/>
+  <style>
+    .h { fill:#E6EEF7; font-size:18px; font-weight:600; letter-spacing:2px; }
+    .sub { fill:#5C6B7D; font-size:12px; }
+    .n { fill:#E6EEF7; font-size:13px; }
+    .x { fill:#9AA9BA; font-size:11px; font-family:JetBrains Mono, SFMono-Regular, Menlo, monospace; }
+    .sw { stroke:#24344A; stroke-width:1; }
+  </style>
+
+  <!-- 1 基底与墨色 -->
+  <text x="40" y="44" class="h">基底与墨色</text>
+  <text x="170" y="44" class="sub">暗室：黑色占画面 85% 以上，面板只比深空亮一级</text>
+  <g transform="translate(40,64)">
+    <rect x="0"   width="112" height="72" rx="4" fill="#05070B" class="sw"/>
+    <rect x="128" width="112" height="72" rx="4" fill="#0A0F17" class="sw"/>
+    <rect x="256" width="112" height="72" rx="4" fill="#121A26" class="sw"/>
+    <rect x="384" width="112" height="72" rx="4" fill="#24344A" class="sw"/>
+    <rect x="512" width="112" height="72" rx="4" fill="#5C6B7D"/>
+    <rect x="640" width="112" height="72" rx="4" fill="#9AA9BA"/>
+    <rect x="768" width="112" height="72" rx="4" fill="#E6EEF7"/>
+    <text x="0"   y="94" class="n">深空</text><text x="0"   y="110" class="x">void-0 #05070B</text>
+    <text x="128" y="94" class="n">暗室</text><text x="128" y="110" class="x">void-1 #0A0F17</text>
+    <text x="256" y="94" class="n">镜筒</text><text x="256" y="110" class="x">void-2 #121A26</text>
+    <text x="384" y="94" class="n">刻度</text><text x="384" y="110" class="x">rule   #24344A</text>
+    <text x="512" y="94" class="n">尘灰</text><text x="512" y="110" class="x">ink-3  #5C6B7D</text>
+    <text x="640" y="94" class="n">雾银</text><text x="640" y="110" class="x">ink-2  #9AA9BA</text>
+    <text x="768" y="94" class="n">月白</text><text x="768" y="110" class="x">ink-1  #E6EEF7</text>
+  </g>
+
+  <!-- 2 星光 -->
+  <text x="40" y="224" class="h">星光 · 黑体色温</text>
+  <text x="200" y="224" class="sub">恒星颜色只来自光谱型，不承担任何玩法语义</text>
+  <g transform="translate(40,244)">
+    <g>
+      <rect x="0" width="112" height="72" rx="4" fill="#0A0F17" class="sw"/><circle cx="56" cy="36" r="14" fill="#9DB4FF" opacity="0.25"/><circle cx="56" cy="36" r="5" fill="#9DB4FF"/>
+      <text x="0" y="94" class="n">O · ≥30 kK</text><text x="0" y="110" class="x">star-o #9DB4FF</text>
+    </g>
+    <g transform="translate(128,0)">
+      <rect width="112" height="72" rx="4" fill="#0A0F17" class="sw"/><circle cx="56" cy="36" r="14" fill="#AABFFF" opacity="0.25"/><circle cx="56" cy="36" r="5" fill="#AABFFF"/>
+      <text y="94" class="n">B · 10–30 kK</text><text y="110" class="x">star-b #AABFFF</text>
+    </g>
+    <g transform="translate(256,0)">
+      <rect width="112" height="72" rx="4" fill="#0A0F17" class="sw"/><circle cx="56" cy="36" r="14" fill="#CAD8FF" opacity="0.25"/><circle cx="56" cy="36" r="5" fill="#CAD8FF"/>
+      <text y="94" class="n">A · 7.5–10 kK</text><text y="110" class="x">star-a #CAD8FF</text>
+    </g>
+    <g transform="translate(384,0)">
+      <rect width="112" height="72" rx="4" fill="#0A0F17" class="sw"/><circle cx="56" cy="36" r="14" fill="#FBF8FF" opacity="0.25"/><circle cx="56" cy="36" r="5" fill="#FBF8FF"/>
+      <text y="94" class="n">F · 6–7.5 kK</text><text y="110" class="x">star-f #FBF8FF</text>
+    </g>
+    <g transform="translate(512,0)">
+      <rect width="112" height="72" rx="4" fill="#0A0F17" class="sw"/><circle cx="56" cy="36" r="14" fill="#FFF4E8" opacity="0.25"/><circle cx="56" cy="36" r="5" fill="#FFF4E8"/>
+      <text y="94" class="n">G · 5.2–6 kK</text><text y="110" class="x">star-g #FFF4E8</text>
+    </g>
+    <g transform="translate(640,0)">
+      <rect width="112" height="72" rx="4" fill="#0A0F17" class="sw"/><circle cx="56" cy="36" r="14" fill="#FFDDB4" opacity="0.25"/><circle cx="56" cy="36" r="5" fill="#FFDDB4"/>
+      <text y="94" class="n">K · 3.7–5.2 kK</text><text y="110" class="x">star-k #FFDDB4</text>
+    </g>
+    <g transform="translate(768,0)">
+      <rect width="112" height="72" rx="4" fill="#0A0F17" class="sw"/><circle cx="56" cy="36" r="14" fill="#FFBD6F" opacity="0.25"/><circle cx="56" cy="36" r="5" fill="#FFBD6F"/>
+      <text y="94" class="n">M · ≤3.7 kK</text><text y="110" class="x">star-m #FFBD6F</text>
+    </g>
+  </g>
+
+  <!-- 3 语义伪彩色 -->
+  <text x="40" y="404" class="h">语义 · 波段伪彩色</text>
+  <text x="216" y="404" class="sub">不可见波段按天文图像惯例上伪彩；一种颜色只表达一种物理通道</text>
+  <g transform="translate(40,424)">
+    <rect x="0"   width="112" height="72" rx="4" fill="#6FE3FF"/>
+    <rect x="128" width="112" height="72" rx="4" fill="#2C7F99"/>
+    <rect x="256" width="112" height="72" rx="4" fill="#EAF2FF"/>
+    <rect x="384" width="112" height="72" rx="4" fill="#FF8A3D"/>
+    <rect x="512" width="112" height="72" rx="4" fill="#4CF2A0"/>
+    <rect x="640" width="112" height="72" rx="4" fill="#FF4FA3"/>
+    <rect x="768" width="112" height="72" rx="4" fill="#A98BFF"/>
+    <rect x="896" width="112" height="72" rx="4" fill="#FF3B47"/>
+    <text x="0"   y="94" class="n">光锥青 · 己方</text><text x="0"   y="110" class="x">self     #6FE3FF</text>
+    <text x="128" y="94" class="n">青影 · 己方弱化</text><text x="128" y="110" class="x">self-dim #2C7F99</text>
+    <text x="256" y="94" class="n">波前白 · 光本身</text><text x="256" y="110" class="x">front    #EAF2FF</text>
+    <text x="384" y="94" class="n">红外琥珀 · 废热</text><text x="384" y="110" class="x">thermal  #FF8A3D</text>
+    <text x="512" y="94" class="n">射电磷绿 · 信标</text><text x="512" y="110" class="x">radio    #4CF2A0</text>
+    <text x="640" y="94" class="n">近红外品红 · 激光</text><text x="640" y="110" class="x">laser    #FF4FA3</text>
+    <text x="768" y="94" class="n">引力波紫 · 星碑</text><text x="768" y="110" class="x">gw       #A98BFF</text>
+    <text x="896" y="94" class="n">警示赤 · 仅 HUD</text><text x="896" y="110" class="x">alert    #FF3B47</text>
+  </g>
+
+  <!-- 4 状态与面积配比 -->
+  <text x="40" y="584" class="h">状态色与面积配比</text>
+  <g transform="translate(40,604)">
+    <rect x="0"   width="112" height="44" rx="4" fill="#9AA9BA" opacity="0.55"/>
+    <rect x="128" width="112" height="44" rx="4" fill="#7E8A66"/>
+    <text x="0"   y="66" class="n">他者无色</text><text x="0"   y="82" class="x">other  ink-2 @55%</text>
+    <text x="128" y="66" class="n">锈绿 · 死域</text><text x="128" y="82" class="x">dead   #7E8A66</text>
+
+    <g transform="translate(272,0)">
+      <rect x="0"   width="612" height="20" fill="#05070B" stroke="#24344A"/>
+      <rect x="520" width="61"  height="20" fill="#E6EEF7" opacity="0.6"/>
+      <rect x="581" width="25"  height="20" fill="#6FE3FF"/>
+      <rect x="606" width="6"   height="20" fill="#FF8A3D"/>
+      <text x="0"   y="40" class="x">深空与暗室 85%</text>
+      <text x="470" y="40" class="x">星光/墨 10%</text>
+      <text x="548" y="58" class="x">己方 4%</text>
+      <text x="560" y="76" class="x">信号·告警 ≤1%</text>
+    </g>
+  </g>
+</svg>

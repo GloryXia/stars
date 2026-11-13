@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 650" width="1040" height="650" font-family="PingFang SC, Noto Sans SC, sans-serif">
+  <defs>
+    <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#6FE3FF" stroke-opacity="0.22" stroke-width="1"/>
+    </pattern>
+    <clipPath id="lensA"><circle cx="372" cy="172" r="48"/></clipPath>
+    <clipPath id="lensB"><circle cx="616" cy="172" r="48"/></clipPath>
+    <radialGradient id="clutter">
+      <stop offset="0" stop-color="#FF8A3D" stop-opacity="0.22"/>
+      <stop offset="0.65" stop-color="#FF8A3D" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#FF8A3D" stop-opacity="0.02"/>
+    </radialGradient>
+    <radialGradient id="mist">
+      <stop offset="0" stop-color="#EAF2FF" stop-opacity="0.26"/>
+      <stop offset="1" stop-color="#EAF2FF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <style>
+    .h { fill:#E6EEF7; font-size:18px; font-weight:600; letter-spacing:2px; }
+    .sub { fill:#5C6B7D; font-size:12px; }
+    .n { fill:#E6EEF7; font-size:13px; text-anchor:middle; }
+    .s { fill:#9AA9BA; font-size:11px; text-anchor:middle; }
+    .micro { fill:#9AA9BA; font-size:10px; }
+    .rule { stroke:#24344A; stroke-width:1; fill:none; }
+  </style>
+  <rect width="1040" height="650" fill="#05070B"/>
+
+  <!-- A · 球体拓扑 -->
+  <text x="40" y="44" class="h">A · 三维球体拓扑与因果边界</text>
+  <text x="40" y="66" class="sub">几何本身不泄露超光速信息；冲突与噪底仅在接触源或宿主波前以光速抵达后才可见。</text>
+
+  <!-- 1 外切 -->
+  <g>
+    <circle cx="116" cy="172" r="46" fill="#6FE3FF" fill-opacity="0.03" stroke="#6FE3FF" stroke-width="1.3"/>
+    <circle cx="198" cy="172" r="36" fill="none" stroke="#9AA9BA" stroke-opacity="0.55" stroke-width="1.2"/>
+    <circle cx="94" cy="172" r="2.5" fill="#6FE3FF"/>
+    <circle cx="162" cy="172" r="3" fill="#EAF2FF"/>
+    <circle cx="162" cy="172" r="10" fill="none" stroke="#EAF2FF" stroke-opacity="0.4" stroke-dasharray="2 3"/>
+    <text x="162" y="152" text-anchor="middle" class="micro">外切点</text>
+    <text x="155" y="264" class="n">外切</text>
+    <text x="155" y="282" class="s">交叠体积 = 0 · 摩擦 = 0</text>
+  </g>
+
+  <!-- 2 空透镜交叠 -->
+  <g>
+    <g clip-path="url(#lensA)">
+      <circle cx="424" cy="172" r="44" fill="url(#hatch)"/>
+    </g>
+    <circle cx="372" cy="172" r="48" fill="none" stroke="#6FE3FF" stroke-width="1.3"/>
+    <circle cx="424" cy="172" r="44" fill="none" stroke="#9AA9BA" stroke-opacity="0.55" stroke-width="1.2"/>
+    <circle cx="348" cy="172" r="2.5" fill="#6FE3FF"/>
+    <text x="398" y="176" text-anchor="middle" class="micro">纯真空</text>
+    <text x="398" y="264" class="n">空透镜交叠</text>
+    <text x="398" y="282" class="s">共览探索区 · 无争夺摩擦</text>
+  </g>
+
+  <!-- 3 含节点交叠 -->
+  <g>
+    <g clip-path="url(#lensB)">
+      <circle cx="668" cy="172" r="44" fill="#FF8A3D" fill-opacity="0.10"/>
+    </g>
+    <circle cx="616" cy="172" r="48" fill="none" stroke="#6FE3FF" stroke-width="1.3"/>
+    <circle cx="668" cy="172" r="44" fill="none" stroke="#9AA9BA" stroke-opacity="0.55" stroke-width="1.2"/>
+    <!-- 指挥核 -->
+    <circle cx="586" cy="172" r="2.5" fill="#6FE3FF"/>
+    <circle cx="586" cy="172" r="6" fill="none" stroke="#6FE3FF" stroke-width="1"/>
+    <!-- 冲突中继 + 抵达波前 -->
+    <circle cx="642" cy="172" r="3" fill="#FF8A3D"/>
+    <circle cx="642" cy="172" r="8" fill="none" stroke="#FF8A3D" stroke-width="1.2"/>
+    <path d="M 616 149 A 34 34 0 0 0 616 195" fill="none" stroke="#EAF2FF" stroke-opacity="0.85" stroke-width="1.2"/>
+    <line x1="634" y1="172" x2="602" y2="172" stroke="#EAF2FF" stroke-opacity="0.65" stroke-dasharray="2 3"/>
+    <path d="M 607 169 L 601 172 L 607 175" fill="none" stroke="#EAF2FF" stroke-width="1.2"/>
+    <text x="642" y="264" class="n">含节点交叠</text>
+    <text x="642" y="282" class="s">接触波前抵达后累计摩擦</text>
+  </g>
+
+  <!-- 4 泡内寄生（包含） -->
+  <g>
+    <circle cx="885" cy="172" r="66" fill="url(#clutter)" stroke="#9AA9BA" stroke-opacity="0.5" stroke-width="1.2"/>
+    <!-- 宿主节点与辐射波前 -->
+    <circle cx="922" cy="148" r="2.5" fill="#FFDDB4"/>
+    <path d="M 885 122 A 44 44 0 0 0 882 198" fill="none" stroke="#FF8A3D" stroke-opacity="0.65" stroke-width="1.2" stroke-dasharray="3 3"/>
+    <!-- 潜伏微球 -->
+    <circle cx="862" cy="184" r="9" fill="#05070B" fill-opacity="0.6" stroke="#2C7F99" stroke-width="1.2" stroke-dasharray="2.5 2.5"/>
+    <circle cx="862" cy="184" r="2" fill="#6FE3FF"/>
+    <text x="885" y="264" class="n">包含（泡内寄生）</text>
+    <text x="885" y="282" class="s">无边界告警 · 波前抬升噪底</text>
+  </g>
+
+  <line x1="40" y1="316" x2="1000" y2="316" class="rule"/>
+
+  <!-- B · 五枚成就徽记 -->
+  <text x="40" y="358" class="h">B · 五枚平行成就铭文（尺规线稿）</text>
+  <text x="40" y="380" class="sub">无金银铜色阶，零属性加成；所有几何都能用圆规和直尺画出。</text>
+
+  <!-- 1 同时空的对视 -->
+  <g transform="translate(128,484)">
+    <circle r="54" class="rule"/>
+    <circle r="46" fill="none" stroke="#5C6B7D" stroke-width="1" stroke-dasharray="1 5"/>
+    <circle cx="-18" cy="0" r="18" fill="none" stroke="#E6EEF7" stroke-width="1.4"/>
+    <circle cx="18" cy="0" r="18" fill="none" stroke="#E6EEF7" stroke-width="1.4"/>
+    <line x1="-42" y1="0" x2="42" y2="0" stroke="#5C6B7D" stroke-width="0.9" stroke-dasharray="2 3"/>
+    <path d="M 0 -7 L 1.6 -1.6 L 7 0 L 1.6 1.6 L 0 7 L -1.6 1.6 L -7 0 L -1.6 -1.6 Z" fill="#E6EEF7"/>
+    <text y="86" class="n">同时空的对视</text>
+    <text y="104" class="s">两圆相切 · 切点一星</text>
+  </g>
+
+  <!-- 2 跨世代的回响 -->
+  <g transform="translate(324,484)">
+    <circle r="54" class="rule"/>
+    <circle r="46" fill="none" stroke="#5C6B7D" stroke-width="1" stroke-dasharray="1 5"/>
+    <ellipse rx="28" ry="15" fill="none" stroke="#E6EEF7" stroke-width="1.4"/>
+    <ellipse rx="15" ry="28" fill="none" stroke="#E6EEF7" stroke-opacity="0.55" stroke-width="1.2" stroke-dasharray="3 3"/>
+    <line x1="-38" y1="22" x2="38" y2="-22" stroke="#E6EEF7" stroke-width="1.2"/>
+    <circle cx="-19" cy="11" r="2.2" fill="#E6EEF7"/>
+    <circle cx="19" cy="-11" r="2.2" fill="#E6EEF7"/>
+    <text y="86" class="n">跨世代的回响</text>
+    <text y="104" class="s">四极形变 · 时间轴</text>
+  </g>
+
+  <!-- 3 深空幽灵 -->
+  <g transform="translate(520,484)">
+    <circle r="54" class="rule"/>
+    <circle r="46" fill="none" stroke="#5C6B7D" stroke-width="1" stroke-dasharray="1 5"/>
+    <circle r="31" fill="none" stroke="#9AA9BA" stroke-width="1.2"/>
+    <circle cx="-11" cy="8" r="5" fill="none" stroke="#E6EEF7" stroke-width="1.2" stroke-dasharray="2 2"/>
+    <circle cx="-11" cy="8" r="1.6" fill="#E6EEF7"/>
+    <text y="86" class="n">深空幽灵</text>
+    <text y="104" class="s">巨泡之中 · 微点潜伏</text>
+  </g>
+
+  <!-- 4 雾中寻真 -->
+  <g transform="translate(716,484)">
+    <circle r="54" class="rule"/>
+    <circle r="46" fill="none" stroke="#5C6B7D" stroke-width="1" stroke-dasharray="1 5"/>
+    <ellipse rx="28" ry="18" fill="url(#mist)" transform="rotate(-24)"/>
+    <circle r="24" fill="none" stroke="#9AA9BA" stroke-width="1" stroke-dasharray="2.5 3.5"/>
+    <g stroke="#E6EEF7" stroke-width="1.3" fill="none">
+      <circle r="6"/>
+      <line x1="10" y1="0" x2="20" y2="0"/><line x1="-10" y1="0" x2="-20" y2="0"/>
+      <line x1="0" y1="10" x2="0" y2="20"/><line x1="0" y1="-10" x2="0" y2="-20"/>
+    </g>
+    <text y="86" class="n">雾中寻真</text>
+    <text y="104" class="s">迷雾之中 · 收敛准星</text>
+  </g>
+
+  <!-- 5 猎手 / 幸存者 -->
+  <g transform="translate(912,484)">
+    <circle r="54" class="rule"/>
+    <circle r="46" fill="none" stroke="#5C6B7D" stroke-width="1" stroke-dasharray="1 5"/>
+    <path d="M 19 -14 A 24 24 0 0 0 -18 -16" fill="none" stroke="#9AA9BA" stroke-width="1.2"/>
+    <path d="M -23 6 A 24 24 0 0 0 -4 23.6" fill="none" stroke="#E6EEF7" stroke-width="1.8"/>
+    <path d="M 14 19.5 A 24 24 0 0 0 23.5 -5" fill="none" stroke="#9AA9BA" stroke-width="1.2"/>
+    <line x1="-29" y1="22" x2="29" y2="-22" stroke="#E6EEF7" stroke-width="1.3"/>
+    <circle cx="29" cy="-22" r="2" fill="#E6EEF7"/>
+    <text y="86" class="n">猎手 / 削蚀幸存者</text>
+    <text y="104" class="s">射线穿碎环 · 残弧犹存</text>
+  </g>
+</svg>

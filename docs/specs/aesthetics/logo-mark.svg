@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 260" width="760" height="260">
+  <defs>
+    <linearGradient id="future" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#EAF2FF" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#EAF2FF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="past" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#EAF2FF" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#EAF2FF" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="elsewhere">
+      <stop offset="0" stop-color="#6FE3FF" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#6FE3FF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="760" height="260" fill="#05070B"/>
+
+  <!-- 闵可夫斯基光锥：中心事件、未来锥、过去锥；锥外（类空区域）的一点即「光锥之外」 -->
+  <g transform="translate(140,130)">
+    <line x1="0" y1="-104" x2="0" y2="104" stroke="#9AA9BA" stroke-opacity="0.28" stroke-width="1"/>
+    <line x1="-104" y1="0" x2="104" y2="0" stroke="#9AA9BA" stroke-opacity="0.28" stroke-width="1" stroke-dasharray="2 5"/>
+    <path d="M0 0 L-88 -88 L88 -88 Z" fill="url(#future)"/>
+    <path d="M0 0 L-88 88 L88 88 Z" fill="url(#past)"/>
+    <ellipse cx="0" cy="-88" rx="88" ry="9" fill="none" stroke="#EAF2FF" stroke-opacity="0.35" stroke-width="1"/>
+    <ellipse cx="0" cy="88" rx="88" ry="9" fill="none" stroke="#EAF2FF" stroke-opacity="0.18" stroke-width="1" stroke-dasharray="3 4"/>
+    <line x1="-88" y1="-88" x2="88" y2="88" stroke="#EAF2FF" stroke-width="1.5"/>
+    <line x1="88" y1="-88" x2="-88" y2="88" stroke="#EAF2FF" stroke-width="1.5"/>
+    <circle r="3" fill="#EAF2FF"/>
+    <circle cx="80" cy="-16" r="16" fill="url(#elsewhere)"/>
+    <circle cx="80" cy="-16" r="3.5" fill="#6FE3FF"/>
+  </g>
+
+  <line x1="290" y1="70" x2="290" y2="190" stroke="#9AA9BA" stroke-opacity="0.25"/>
+  <text x="322" y="138" fill="#E6EEF7" font-family="Noto Serif SC, Source Han Serif SC, Songti SC, serif" font-size="62" font-weight="600" letter-spacing="14">光锥之外</text>
+  <text x="324" y="172" fill="#9AA9BA" font-family="JetBrains Mono, SFMono-Regular, Menlo, monospace" font-size="14" letter-spacing="6.2">BEYOND THE LIGHT CONE</text>
+  <text x="324" y="206" fill="#5C6B7D" font-family="PingFang SC, Noto Sans SC, sans-serif" font-size="13" letter-spacing="4">所见皆往昔</text>
+</svg>

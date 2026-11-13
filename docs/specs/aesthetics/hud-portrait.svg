@@ -1,0 +1,288 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 890 1016" width="890" height="1016" font-family="PingFang SC, Noto Sans SC, sans-serif">
+  <defs>
+    <radialGradient id="rim" r="0.5">
+      <stop offset="0.82" stop-color="#6FE3FF" stop-opacity="0.02"/>
+      <stop offset="0.97" stop-color="#6FE3FF" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#6FE3FF" stop-opacity="0.85"/>
+    </radialGradient>
+    <radialGradient id="blob2">
+      <stop offset="0" stop-color="#EAF2FF" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#EAF2FF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="vig" r="0.75">
+      <stop offset="0.6" stop-color="#05070B" stop-opacity="0"/>
+      <stop offset="1" stop-color="#05070B" stop-opacity="0.85"/>
+    </radialGradient>
+    <linearGradient id="mw" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9DB4FF" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#CAD8FF" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#9DB4FF" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="phone"><rect width="375" height="812" rx="44"/></clipPath>
+  </defs>
+  <style>
+    .t { fill:#E6EEF7; font-size:15px; font-weight:600; letter-spacing:1px; }
+    .lab { fill:#9AA9BA; font-size:11px; }
+    .lab3 { fill:#5C6B7D; font-size:11px; }
+    .ink { fill:#E6EEF7; }
+    .mono { font-family:JetBrains Mono, SFMono-Regular, Menlo, monospace; }
+    .serif { font-family:Noto Serif SC, Source Han Serif SC, Songti SC, serif; }
+    .rule { stroke:#24344A; fill:none; }
+  </style>
+  <rect width="890" height="1016" fill="#020305"/>
+  <text x="40" y="32" class="t">① 正式对局 · 三维星泡图（扩张进行中）</text>
+  <text x="475" y="32" class="t">② 正式对局 · 选中 B（天球仪 + 底部详情）</text>
+
+  <!-- ================= 手机 1 ================= -->
+  <g transform="translate(40,52)">
+    <g clip-path="url(#phone)">
+      <rect width="375" height="812" fill="#05070B"/>
+
+      <!-- 席位局部基准参考面（z_local = 0） -->
+      <g transform="translate(187,400)">
+        <ellipse rx="60" ry="20" class="rule"/>
+        <ellipse rx="120" ry="40" class="rule"/>
+        <ellipse rx="180" ry="60" class="rule" stroke-dasharray="2 4"/>
+        <line x1="-180" y1="0" x2="180" y2="0" class="rule" stroke-dasharray="2 4"/>
+        <line x1="0" y1="-60" x2="0" y2="60" class="rule" stroke-dasharray="2 4"/>
+      </g>
+      <!-- 背景星 + 落地线 -->
+      <g>
+        <line x1="70" y1="330" x2="70" y2="392" stroke="#24344A"/><circle cx="70" cy="330" r="1.6" fill="#FFDDB4"/>
+        <line x1="120" y1="290" x2="120" y2="372" stroke="#24344A"/><circle cx="120" cy="290" r="1.2" fill="#CAD8FF"/>
+        <line x1="300" y1="300" x2="300" y2="385" stroke="#24344A"/><circle cx="300" cy="300" r="1.4" fill="#FFF4E8"/>
+        <line x1="335" y1="452" x2="335" y2="414" stroke="#24344A"/><circle cx="335" cy="452" r="1.2" fill="#FFBD6F"/>
+        <line x1="48" y1="470" x2="48" y2="418" stroke="#24344A"/><circle cx="48" cy="470" r="1.5" fill="#AABFFF"/>
+        <circle cx="34" cy="250" r="1" fill="#FFF4E8"/><circle cx="210" cy="232" r="1.1" fill="#FBF8FF"/>
+        <circle cx="352" cy="262" r="0.9" fill="#FFBD6F"/><circle cx="262" cy="520" r="1.1" fill="#CAD8FF"/>
+        <circle cx="96" cy="548" r="0.9" fill="#FFDDB4"/><circle cx="160" cy="512" r="1" fill="#FFF4E8"/>
+        <circle cx="236" cy="286" r="0.8" fill="#FFDDB4"/><circle cx="28" cy="388" r="0.8" fill="#FBF8FF"/>
+      </g>
+
+      <!-- 外球：光锥（极淡） -->
+      <circle cx="187" cy="400" r="152" fill="none" stroke="#EAF2FF" stroke-opacity="0.16"/>
+      <text x="187" y="242" text-anchor="middle" class="lab3">光锥外球 · 示意比例</text>
+      <!-- 目标半径（虚） -->
+      <circle cx="187" cy="400" r="100" fill="none" stroke="#6FE3FF" stroke-opacity="0.55" stroke-dasharray="3 5"/>
+      <text x="187" y="294" text-anchor="middle" class="lab" fill="#6FE3FF">目标 4.00 ly</text>
+      <!-- 当前包络（菲涅尔边缘） -->
+      <circle cx="187" cy="400" r="52" fill="url(#rim)"/>
+      <!-- A–B 链路与授权在途 -->
+      <line x1="187" y1="400" x2="287" y2="400" stroke="#2C7F99" stroke-opacity="0.7" stroke-dasharray="1.5 4"/>
+      <!-- A 指挥核 / 摇篮 -->
+      <g transform="translate(187,400)" stroke="#6FE3FF" stroke-width="1.5" fill="none">
+        <circle r="2.8" fill="#FFF4E8" stroke="none"/>
+        <circle r="11"/>
+        <line x1="14" y1="0" x2="19" y2="0"/><line x1="-14" y1="0" x2="-19" y2="0"/>
+        <line x1="0" y1="14" x2="0" y2="19"/><line x1="0" y1="-14" x2="0" y2="-19"/>
+      </g>
+      <text x="164" y="434" class="lab">A · 指挥核</text>
+      <!-- B 待确认 -->
+      <g transform="translate(287,400)">
+        <circle r="2.8" fill="#FFDDB4"/>
+        <circle r="11" fill="none" stroke="#6FE3FF" stroke-width="1.5" stroke-dasharray="3.5 3.5" opacity="0.85"/>
+      </g>
+      <text x="270" y="430" class="lab">B · 待确认</text>
+
+      <!-- 边缘来向提示 -->
+      <path d="M 6 300 A 120 120 0 0 1 6 352" fill="none" stroke="#9AA9BA" stroke-width="2"/>
+      <text x="14" y="330" class="lab3">来向扇区</text>
+
+      <!-- 顶部 HUD -->
+      <text x="28" y="30" class="lab3 mono">9:41</text>
+      <text x="20" y="72" class="lab">E01 · 中密度 · 席位 A</text>
+      <text x="20" y="98" class="ink serif" font-size="18">天时 <tspan class="mono" font-size="17">20.9</tspan> 年</text>
+      <text x="150" y="98" class="lab mono" font-size="13" fill="#9AA9BA">人时 31:21</text>
+      <g transform="translate(336,84)">
+        <circle r="17" class="rule" stroke-width="3"/>
+        <path d="M 0 -17 A 17 17 0 0 1 11.6 -12.4" fill="none" stroke="#2C7F99" stroke-width="3"/>
+        <text y="4" text-anchor="middle" class="ink mono" font-size="11">12</text>
+        <text y="32" text-anchor="middle" class="lab3">SDI%</text>
+      </g>
+      <!-- 视角切换 -->
+      <rect x="112" y="122" width="150" height="30" rx="15" class="rule"/>
+      <rect x="187" y="124" width="73" height="26" rx="13" fill="#121A26"/>
+      <text x="149" y="142" text-anchor="middle" class="lab">天球仪</text>
+      <text x="224" y="142" text-anchor="middle" class="ink" font-size="12">星泡图</text>
+
+      <!-- 半径推杆（对数弧） -->
+      <g>
+        <path d="M 255 712 A 100 100 0 0 1 355 612" fill="none" stroke="#24344A" stroke-width="4" stroke-linecap="round"/>
+        <path d="M 255 712 A 100 100 0 0 1 310.1 622.7" fill="none" stroke="#6FE3FF" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="322.3" cy="617.5" r="6" fill="none" stroke="#6FE3FF" stroke-width="1.5" stroke-dasharray="2 2"/>
+        <circle cx="310.1" cy="622.7" r="9" fill="#05070B" stroke="#6FE3FF" stroke-width="2"/>
+        <text x="216" y="715" class="lab3 mono" font-size="10">0.01</text>
+        <text x="230" y="658" class="lab3 mono" font-size="10">0.1</text>
+        <text x="275" y="608" class="lab3 mono" font-size="10">1</text>
+        <text x="328" y="594" class="lab3 mono" font-size="10">10</text>
+        <text x="355" y="604" class="lab3 mono" font-size="10">20</text>
+        <text x="286" y="672" class="lab">当前</text>
+        <text x="286" y="692" class="ink mono" font-size="16">2.10<tspan class="lab"> ly</tspan></text>
+        <text x="286" y="709" class="lab" fill="#6FE3FF">→ 4.00</text>
+      </g>
+
+      <!-- 底部栏（正式实时对局仅保留观测/隐匿模式与扩张确认，不含时间暂停/倍速） -->
+      <line x1="20" y1="720" x2="355" y2="720" class="rule"/>
+      <text x="20" y="742" class="lab">已确认</text><text x="62" y="743" class="ink mono" font-size="15">1</text>
+      <text x="90" y="742" class="lab">可达</text><text x="120" y="743" class="ink mono" font-size="15">0</text>
+      <text x="148" y="742" class="lab">冗余</text><text x="178" y="743" class="ink mono" font-size="15">1.00</text>
+      <rect x="20" y="756" width="76" height="32" rx="16" fill="#0A0F17" stroke="#364A66"/>
+      <circle cx="32" cy="772" r="2.2" fill="#6FE3FF"/>
+      <text x="62" y="776" text-anchor="middle" class="ink" font-size="11">观测·巡天</text>
+      <rect x="102" y="756" width="70" height="32" rx="16" fill="#0A0F17" stroke="#24344A"/>
+      <text x="137" y="776" text-anchor="middle" class="lab" font-size="11">隐匿·关</text>
+      <rect x="180" y="755" width="175" height="34" rx="17" fill="#6FE3FF" fill-opacity="0.08" stroke="#6FE3FF"/>
+      <text x="267.5" y="776" text-anchor="middle" fill="#6FE3FF" font-size="12.5" letter-spacing="0.4">确认目标 → 4.00 光年</text>
+      <rect x="120" y="800" width="135" height="4" rx="2" fill="#5C6B7D"/>
+    </g>
+    <rect width="375" height="812" rx="44" fill="none" stroke="#24344A" stroke-width="2"/>
+  </g>
+
+  <!-- ================= 手机 2 ================= -->
+  <g transform="translate(475,52)">
+    <g clip-path="url(#phone)">
+      <rect width="375" height="812" fill="#05070B"/>
+      <!-- 银河带（天然斜穿席位局部惯性系赤道面） -->
+      <rect x="-80" y="225" width="540" height="145" fill="url(#mw)" transform="rotate(28 187 295)"/>
+      <!-- 第一人称全天球面经纬网（席位局部惯性系 θ, φ 透视投影，铺满全屏） -->
+      <g fill="none">
+        <!-- 纬线 φ = -30, -15, 0(局部基准赤道), +15, +30, +45 -->
+        <path d="M 454.7 491.1 L 405.5 481.5 L 352.0 474.1 L 296.7 471.1 L 239.3 474.6 L 185.3 485.4 L 128.6 504.9 L 86.1 524.5" stroke="#24344A" stroke-opacity="0.55" stroke-width="0.9"/>
+        <path d="M 450.4 377.7 L 387.8 377.4 L 326.8 379.2 L 267.3 383.8 L 206.2 392.3 L 145.9 405.2 L 88.4 421.2 L 30.5 440.4 L -28.2 462.1" stroke="#24344A" stroke-opacity="0.7" stroke-width="0.9"/>
+        <path d="M 451.7 280.9 L 388.9 291.9 L 328.3 302.6 L 269.8 312.9 L 210.8 323.4 L 153.8 333.4 L 91.5 344.4 L 26.4 355.9 L -45.2 368.5" stroke="#5C6B7D" stroke-opacity="0.5" stroke-width="1.1"/>
+        <path d="M 453.1 182.6 L 389.9 207.0 L 329.7 228.3 L 272.2 245.9 L 214.9 260.0 L 160.7 269.8 L 103.1 276.5 L 45.1 280.0 L -15.5 281.1" stroke="#24344A" stroke-opacity="0.7" stroke-width="0.9"/>
+        <path d="M 448.8 69.6 L 386.7 110.8 L 327.9 145.4 L 272.1 172.7 L 217.0 192.7 L 165.5 204.2 L 112.0 209.1 L 59.9 207.8 L 7.5 201.9 L -44.6 192.6" stroke="#24344A" stroke-opacity="0.7" stroke-width="0.9"/>
+        <path d="M 399.2 -39.5 L 349.1 12.2 L 299.4 56.3 L 250.4 90.9 L 200.4 115.2 L 152.5 127.4 L 102.0 129.4 L 52.8 122.3 L 3.8 108.5 L -44.2 90.0" stroke="#24344A" stroke-opacity="0.55" stroke-width="0.9"/>
+        <!-- 经线 θ = 0, 15, 30, 45, 60, 75 -->
+        <path d="M 450.1 426.9 L 422.4 346.1 L 395.8 268.3 L 367.8 186.4 L 337.8 98.8 L 305.3 3.6" stroke="#24344A" stroke-opacity="0.55" stroke-width="0.9"/>
+        <path d="M 371.9 525.8 L 346.7 432.2 L 322.7 343.0 L 298.3 252.4 L 273.7 161.0 L 245.2 54.9 L 222.4 -29.7" stroke="#24344A" stroke-opacity="0.7" stroke-width="0.9"/>
+        <path d="M 286.7 517.2 L 268.6 433.1 L 249.3 343.1 L 229.8 252.4 L 208.7 154.0 L 187.3 54.2 L 167.1 -40.0" stroke="#24344A" stroke-opacity="0.7" stroke-width="0.9"/>
+        <path d="M 215.3 524.9 L 199.6 430.9 L 185.2 345.0 L 170.4 255.9 L 153.7 156.0 L 136.2 51.3 L 123.2 -26.6" stroke="#24344A" stroke-opacity="0.7" stroke-width="0.9"/>
+        <path d="M 140.3 515.9 L 129.6 425.8 L 119.4 339.5 L 108.2 245.6 L 96.5 146.8 L 82.8 31.3 L 75.3 -31.4" stroke="#24344A" stroke-opacity="0.7" stroke-width="0.9"/>
+        <path d="M 54.9 523.9 L 48.9 428.0 L 43.6 342.8 L 37.6 246.2 L 30.7 136.3 L 24.1 29.6 L 20.2 -32.6" stroke="#24344A" stroke-opacity="0.7" stroke-width="0.9"/>
+        <!-- 基准赤道刻度 -->
+        <path d="M 364.4 301.5 L 361.3 291.6 M 346.4 304.5 L 343.5 294.9 M 329.6 307.3 L 327.0 298.0 M 315.0 314.5 L 310.1 296.4 M 298.8 312.5 L 296.5 303.6 M 284.5 314.9 L 282.4 306.2 M 270.8 317.2 L 268.8 308.7 M 257.6 319.5 L 255.7 311.1 M 245.6 325.9 L 242.0 309.2 M 232.1 323.9 L 230.4 315.6 M 219.7 326.0 L 218.1 317.8 M 207.5 328.2 L 206.0 320.0 M 195.3 330.3 L 193.9 322.1 M 183.8 336.6 L 181.1 320.2 M 170.9 334.7 L 169.6 326.4 M 158.5 336.9 L 157.3 328.5 M 146.0 339.1 L 144.8 330.7 M 133.1 341.4 L 132.0 332.9 M 120.4 348.2 L 118.3 330.8 M 106.2 346.3 L 105.2 337.4 M 91.9 349.0 L 91.1 339.8 M 77.0 351.7 L 76.2 342.3 M 61.3 354.6 L 60.5 345.0 M 44.9 362.8 L 43.6 342.8 M 26.6 361.1 L 26.1 350.7" stroke="#5C6B7D" stroke-opacity="0.45" stroke-width="0.9"/>
+      </g>
+      <!-- 经纬刻度标签 -->
+      <g class="lab3 mono" font-size="9.5" opacity="0.85">
+        <text x="319" y="324">15°</text>
+        <text x="249" y="335">30°</text>
+        <text x="187" y="345">45°</text>
+        <text x="124" y="356">60°</text>
+        <text x="16" y="200">+30°</text>
+        <text x="16" y="276">+15°</text>
+        <text x="16" y="353">0°</text>
+        <text x="16" y="438">−15°</text>
+      </g>
+      <!-- 背景恒星 -->
+      <g>
+        <circle cx="86" cy="242" r="1.2" fill="#FFF4E8"/><circle cx="144" cy="194" r="0.9" fill="#CAD8FF"/>
+        <circle cx="266" cy="224" r="1.4" fill="#FFBD6F"/><circle cx="308" cy="276" r="1.1" fill="#FBF8FF"/>
+        <circle cx="58" cy="368" r="1.0" fill="#FFDDB4"/><circle cx="152" cy="408" r="1.3" fill="#AABFFF"/>
+        <circle cx="212" cy="428" r="0.9" fill="#FFF4E8"/><circle cx="322" cy="396" r="1.1" fill="#FFDDB4"/>
+        <circle cx="184" cy="182" r="1.0" fill="#FBF8FF"/><circle cx="34" cy="296" r="0.9" fill="#CAD8FF"/>
+        <circle cx="278" cy="346" r="1.0" fill="#FFF4E8"/><circle cx="176" cy="264" r="0.8" fill="#FFDDB4"/>
+        <circle cx="332" cy="196" r="1.0" fill="#9DB4FF"/><circle cx="98" cy="188" r="0.9" fill="#FFF4E8"/>
+      </g>
+      <!-- 弱异常：高斯模糊方向雾 -->
+      <ellipse cx="104" cy="285" rx="22" ry="14" fill="url(#blob2)" transform="rotate(-18 104 285)"/>
+      <circle cx="104" cy="285" r="30" fill="none" stroke="#9AA9BA" stroke-opacity="0.5" stroke-dasharray="2 4"/>
+      <!-- B：选中 -->
+      <g transform="translate(219,301)">
+        <circle r="2.8" fill="#FFDDB4"/>
+        <circle r="11" fill="none" stroke="#6FE3FF" stroke-width="1.5" stroke-dasharray="3.5 3.5"/>
+        <g stroke="#E6EEF7" stroke-width="1.2">
+          <path d="M -20 -14 L -20 -20 L -14 -20 M 14 -20 L 20 -20 L 20 -14 M 20 14 L 20 20 L 14 20 M -14 20 L -20 20 L -20 14" fill="none"/>
+        </g>
+      </g>
+      <text x="243" y="294" class="lab">B</text>
+      <!-- 第一人称视线指向与 FOV 读数 -->
+      <text x="20" y="472" class="lab3 mono" font-size="10">θ 42.0°  φ +10.0° · FOV 78°</text>
+      <rect width="375" height="812" fill="url(#vig)" opacity="0.35"/>
+
+      <!-- 顶部 HUD（同手机 1） -->
+      <text x="28" y="30" class="lab3 mono">9:41</text>
+      <text x="20" y="72" class="lab">E01 · 中密度 · 席位 A</text>
+      <text x="20" y="98" class="ink serif" font-size="18">天时 <tspan class="mono" font-size="17">20.9</tspan> 年</text>
+      <text x="150" y="98" class="lab mono" font-size="13" fill="#9AA9BA">人时 31:21</text>
+      <g transform="translate(336,84)">
+        <circle r="17" class="rule" stroke-width="3"/>
+        <path d="M 0 -17 A 17 17 0 0 1 11.6 -12.4" fill="none" stroke="#2C7F99" stroke-width="3"/>
+        <text y="4" text-anchor="middle" class="ink mono" font-size="11">12</text>
+        <text y="32" text-anchor="middle" class="lab3">SDI%</text>
+      </g>
+      <rect x="112" y="122" width="150" height="30" rx="15" class="rule"/>
+      <rect x="114" y="124" width="73" height="26" rx="13" fill="#121A26"/>
+      <text x="150" y="142" text-anchor="middle" class="ink" font-size="12">天球仪</text>
+      <text x="224" y="142" text-anchor="middle" class="lab">星泡图</text>
+
+      <!-- 底部详情 -->
+      <rect x="0" y="486" width="375" height="340" rx="20" fill="#0A0F17" stroke="#24344A"/>
+      <rect x="167" y="496" width="40" height="4" rx="2" fill="#24344A"/>
+      <text x="24" y="540" class="ink serif" font-size="24">B</text>
+      <text x="48" y="539" class="lab">公开星表 · K 型主序星</text>
+      <rect x="230" y="522" width="64" height="24" rx="12" fill="none" stroke="#6FE3FF" stroke-dasharray="3 3"/>
+      <text x="262" y="538" text-anchor="middle" fill="#6FE3FF" font-size="12">待确认</text>
+      <g stroke="#9AA9BA" stroke-width="1.4"><line x1="334" y1="526" x2="346" y2="538"/><line x1="346" y1="526" x2="334" y2="538"/></g>
+      <line x1="24" y1="560" x2="351" y2="560" class="rule"/>
+
+      <text x="24" y="588" class="lab">距离（星表）</text>
+      <text x="24" y="610" class="ink mono" font-size="16">4.00<tspan class="lab"> ly</tspan></text>
+      <text x="24" y="642" class="lab">单程光行</text>
+      <text x="24" y="664" class="ink mono" font-size="16">4.0<tspan class="lab"> 年 · 人时 </tspan>6:00</text>
+      <text x="24" y="696" class="lab">最近报告</text>
+      <text x="24" y="718" class="lab3 mono" font-size="14">— 尚无来自 B 的光信</text>
+
+      <!-- 光信邮戳 -->
+      <g transform="translate(292,640)">
+        <circle r="46" fill="none" stroke="#5C6B7D" stroke-width="1.2"/>
+        <circle r="40" fill="none" stroke="#5C6B7D" stroke-width="0.8" stroke-dasharray="2 3"/>
+        <text y="-14" text-anchor="middle" class="lab3">采样</text>
+        <text y="2" text-anchor="middle" class="lab mono" font-size="10">— sim_s</text>
+        <text y="20" text-anchor="middle" class="lab3">抵达 · 在途</text>
+        <path d="M -110 -20 q 8 -6 16 0 t 16 0 t 16 0 t 16 0 M -110 -6 q 8 -6 16 0 t 16 0 t 16 0 t 16 0 M -110 8 q 8 -6 16 0 t 16 0 t 16 0 t 16 0" fill="none" stroke="#24344A" stroke-width="1"/>
+      </g>
+
+      <line x1="24" y1="742" x2="351" y2="742" class="rule"/>
+      <text x="24" y="768" class="lab" font-style="italic">你看到的 B，是它 4.0 年前的样子。</text>
+      <rect x="120" y="800" width="135" height="4" rx="2" fill="#5C6B7D"/>
+    </g>
+    <rect width="375" height="812" rx="44" fill="none" stroke="#24344A" stroke-width="2"/>
+  </g>
+
+  <!-- ================= 独立底栏：M2 离线原型调试条（非正式实时对局 HUD） ================= -->
+  <g transform="translate(40,892)">
+    <rect width="810" height="96" rx="12" fill="#080C12" stroke="#24344A" stroke-dasharray="5 3"/>
+    <rect x="18" y="12" width="118" height="20" rx="4" fill="#6FE3FF" fill-opacity="0.08" stroke="#6FE3FF" stroke-opacity="0.35"/>
+    <text x="77" y="26" text-anchor="middle" fill="#6FE3FF" font-size="10.5">M2 离线原型调试条</text>
+    <text x="148" y="26" class="lab">仅用于 M2 本地演示与 M4 显影回放；M3+ 正式实时对局隐藏此条（光速不可暂停 / 倍速）</text>
+    <text x="792" y="26" text-anchor="end" class="lab mono">00:00  ·  <tspan class="ink">31:21</tspan>  /  65:51</text>
+
+    <!-- 暂停 || -->
+    <rect x="18" y="49" width="76" height="32" rx="16" fill="#0A0F17" stroke="#364A66"/>
+    <g stroke="#9AA9BA" stroke-width="1.5">
+      <line x1="34" y1="59" x2="34" y2="71"/><line x1="40" y1="59" x2="40" y2="71"/>
+    </g>
+    <text x="64" y="69" text-anchor="middle" class="ink" font-size="11.5">暂停</text>
+
+    <!-- 快进 >> -->
+    <rect x="104" y="49" width="96" height="32" rx="16" fill="#0A0F17" stroke="#364A66"/>
+    <path d="M119 60 L125 65 L119 70 M125 60 L131 65 L125 70" fill="none" stroke="#9AA9BA" stroke-width="1.4"/>
+    <text x="163" y="69" text-anchor="middle" class="ink" font-size="11.5">快进 ×10</text>
+
+    <!-- 重播 ↻ -->
+    <rect x="210" y="49" width="76" height="32" rx="16" fill="#0A0F17" stroke="#364A66"/>
+    <path d="M233 65 A 5.5 5.5 0 1 1 228 59.5 M228 56 L231.5 59.5 L228 63" fill="none" stroke="#9AA9BA" stroke-width="1.3"/>
+    <text x="257" y="69" text-anchor="middle" class="ink" font-size="11.5">重播</text>
+
+    <!-- 演示时间轴进度条（31:21 / 65:51，59:51 为扩张到达 B 刻度） -->
+    <line x1="304" y1="65" x2="616" y2="65" stroke="#1E2B3D" stroke-width="3" stroke-linecap="round"/>
+    <line x1="304" y1="65" x2="452" y2="65" stroke="#6FE3FF" stroke-opacity="0.7" stroke-width="3" stroke-linecap="round"/>
+    <line x1="588" y1="59" x2="588" y2="71" stroke="#5C6B7D" stroke-width="1.2"/>
+    <circle cx="452" cy="65" r="5" fill="#6FE3FF" stroke="#05070B" stroke-width="1.5"/>
+
+    <!-- M2 演示预设脚本按钮 -->
+    <rect x="634" y="49" width="158" height="32" rx="16" fill="#6FE3FF" fill-opacity="0.08" stroke="#6FE3FF" stroke-opacity="0.7"/>
+    <text x="713" y="69" text-anchor="middle" fill="#6FE3FF" font-size="12">预设 · 扩张至 4 光年</text>
+  </g>
+</svg>

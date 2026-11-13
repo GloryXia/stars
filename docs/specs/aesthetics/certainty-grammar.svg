@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 760" width="1040" height="760" font-family="PingFang SC, Noto Sans SC, sans-serif">
+  <defs>
+    <radialGradient id="blob">
+      <stop offset="0" stop-color="#EAF2FF" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#EAF2FF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="halo">
+      <stop offset="0" stop-color="#FFF4E8" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#FFF4E8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="heat">
+      <stop offset="0" stop-color="#FF8A3D" stop-opacity="0.65"/>
+      <stop offset="0.5" stop-color="#FF8A3D" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#FF8A3D" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ray" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#EAF2FF" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#EAF2FF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="trail" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6FE3FF" stop-opacity="0"/>
+      <stop offset="1" stop-color="#6FE3FF" stop-opacity="0.9"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .h { fill:#E6EEF7; font-size:18px; font-weight:600; letter-spacing:2px; }
+    .sub { fill:#5C6B7D; font-size:12px; }
+    .n { fill:#E6EEF7; font-size:13px; }
+    .s { fill:#9AA9BA; font-size:11px; }
+    .rule { stroke:#24344A; stroke-width:1; }
+  </style>
+  <rect width="1040" height="760" fill="#05070B"/>
+
+  <!-- A 观测确定性 -->
+  <text x="40" y="44" class="h">A · 观测确定性：从一团雾到一个点</text>
+  <text x="40" y="66" class="sub">形状随证据收敛。没有距离证据就没有终点，没有三维定位就不能拾取为打击目标。</text>
+  <line x1="40" y1="232" x2="1000" y2="232" class="rule"/>
+
+  <g transform="translate(160,148)">
+    <ellipse rx="40" ry="26" fill="url(#blob)" transform="rotate(-25)"/>
+    <circle r="52" fill="none" stroke="#9AA9BA" stroke-opacity="0.6" stroke-dasharray="3 5"/>
+  </g>
+  <text x="80" y="222" class="n">① 弱异常 · 1 ≤ SNR &lt; 5</text>
+
+  <text x="292" y="154" fill="#5C6B7D" font-size="22">→</text>
+
+  <g transform="translate(400,148)" stroke="#EAF2FF" stroke-width="1.2" fill="none">
+    <circle r="9"/>
+    <line x1="13" y1="0" x2="28" y2="0"/><line x1="-13" y1="0" x2="-28" y2="0"/>
+    <line x1="0" y1="13" x2="0" y2="28"/><line x1="0" y1="-13" x2="0" y2="-28"/>
+  </g>
+  <text x="372" y="196" class="s">天球仪：准星</text>
+  <g transform="translate(486,178)">
+    <circle r="3" fill="#6FE3FF"/>
+    <line x1="4" y1="-2" x2="170" y2="-80" stroke="url(#ray)" stroke-width="1.4"/>
+  </g>
+  <text x="500" y="196" class="s">星泡图：射线，无终点</text>
+  <text x="372" y="222" class="n">② 二维方位锁 · SNR ≥ 5</text>
+
+  <text x="690" y="154" fill="#5C6B7D" font-size="22">→</text>
+
+  <g transform="translate(850,148)">
+    <ellipse rx="34" ry="13" fill="#EAF2FF" fill-opacity="0.05" stroke="#EAF2FF" stroke-opacity="0.7" transform="rotate(-18)"/>
+    <line x1="-34" y1="11" x2="-26" y2="8.5" stroke="#EAF2FF" stroke-opacity="0.7" transform="rotate(-18)"/>
+    <circle r="3.2" fill="#EAF2FF"/>
+    <text x="38" y="-14" class="s">±σ</text>
+  </g>
+  <text x="770" y="222" class="n">③ 三维星历定位 · 可拾取</text>
+
+  <!-- B 节点状态 -->
+  <text x="40" y="272" class="h">B · 节点状态：实线是确认，虚线是等待</text>
+  <text x="40" y="294" class="sub">恒星本体保持光谱色；状态只由外圈线型表达，色盲与灰度下仍可区分。</text>
+  <line x1="40" y1="452" x2="1000" y2="452" class="rule"/>
+
+  <g transform="translate(96,358)">
+    <circle r="12" fill="url(#halo)"/><circle r="3" fill="#FFF4E8"/>
+  </g>
+  <text x="62" y="408" class="n">公开星</text><text x="62" y="424" class="s">星表可见</text>
+
+  <g transform="translate(216,358)">
+    <circle r="3" fill="#FFF4E8"/>
+    <circle r="14" fill="none" stroke="#6FE3FF" stroke-width="1.5"/>
+    <line x1="-11" y1="22" x2="11" y2="22" stroke="#6FE3FF" stroke-width="1.5"/>
+  </g>
+  <text x="186" y="408" class="n">摇篮</text><text x="186" y="424" class="s">环 + 地平线</text>
+
+  <g transform="translate(336,358)" stroke="#6FE3FF" stroke-width="1.5" fill="none">
+    <circle r="3" fill="#FFF4E8" stroke="none"/>
+    <circle r="14"/>
+    <line x1="18" y1="0" x2="24" y2="0"/><line x1="-18" y1="0" x2="-24" y2="0"/>
+    <line x1="0" y1="18" x2="0" y2="24"/><line x1="0" y1="-18" x2="0" y2="-24"/>
+  </g>
+  <text x="304" y="408" class="n">指挥核</text><text x="304" y="424" class="s">环 + 四向刻度</text>
+
+  <g transform="translate(456,358)">
+    <circle r="3" fill="#FFDDB4"/>
+    <circle r="14" fill="none" stroke="#6FE3FF" stroke-width="1.5"/>
+  </g>
+  <text x="426" y="408" class="n">已确认</text><text x="426" y="424" class="s">回执已抵达</text>
+
+  <g transform="translate(576,358)">
+    <circle r="3" fill="#FFDDB4"/>
+    <circle r="14" fill="none" stroke="#6FE3FF" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.85"/>
+  </g>
+  <text x="546" y="408" class="n">待确认</text><text x="546" y="424" class="s">虚环 · 4 s 慢呼吸</text>
+
+  <g transform="translate(696,358)">
+    <circle r="3" fill="#FFDDB4"/>
+    <circle r="14" fill="none" stroke="#5C6B7D" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <text x="13" y="-12" fill="#9AA9BA" font-size="11">?</text>
+  </g>
+  <text x="662" y="408" class="n">超时·未确认</text><text x="662" y="424" class="s">灰虚环 + 问号</text>
+
+  <g transform="translate(816,358)">
+    <circle r="3" fill="#FFDDB4"/>
+    <path d="M 12.1 -7 A 14 14 0 1 1 7 -12.1" fill="none" stroke="#2C7F99" stroke-width="1.5"/>
+  </g>
+  <text x="786" y="408" class="n">失联</text><text x="786" y="424" class="s">缺口环 · 仍归属</text>
+
+  <g transform="translate(936,358)" stroke="#5C6B7D" stroke-width="1.5" fill="none">
+    <path d="M 15 -3 A 15 15 0 0 0 9 -12"/>
+    <path d="M -4 -16 A 16 16 0 0 0 -13 -9"/>
+    <path d="M -15 6 A 16 16 0 0 0 -6 15"/>
+    <path d="M 7 14 A 16 16 0 0 0 14 7"/>
+    <line x1="-3" y1="-3" x2="3" y2="3"/><line x1="3" y1="-3" x2="-3" y2="3"/>
+  </g>
+  <text x="906" y="408" class="n">损毁·废墟</text><text x="906" y="424" class="s">碎环 + 叉</text>
+
+  <!-- C 链路 -->
+  <text x="40" y="492" class="h">C · 链路与报告</text>
+  <text x="40" y="514" class="sub">线只画已披露的链路；报告随信息龄变淡，过期后断开。</text>
+  <line x1="40" y1="612" x2="1000" y2="612" class="rule"/>
+
+  <g transform="translate(60,550)">
+    <line x1="0" y1="0" x2="150" y2="0" stroke="#6FE3FF" stroke-width="1.5"/>
+    <text y="34" class="n">双向有效</text>
+  </g>
+  <g transform="translate(250,550)">
+    <line x1="0" y1="0" x2="150" y2="0" stroke="#2C7F99" stroke-width="1.2"/>
+    <path d="M40 -4 L46 0 L40 4 M75 -4 L81 0 L75 4 M110 -4 L116 0 L110 4" fill="none" stroke="#6FE3FF" stroke-width="1.4"/>
+    <text y="34" class="n">单向可用</text>
+  </g>
+  <g transform="translate(440,550)">
+    <line x1="0" y1="0" x2="150" y2="0" stroke="#2C7F99" stroke-width="1" stroke-opacity="0.6"/>
+    <rect x="50" y="-1.5" width="60" height="3" fill="url(#trail)"/>
+    <circle cx="110" cy="0" r="3.2" fill="#E6EEF7"/>
+    <text y="34" class="n">己方指令在途 · 匀速光行</text>
+  </g>
+  <g transform="translate(630,550)">
+    <line x1="0" y1="0" x2="150" y2="0" stroke="#5C6B7D" stroke-width="1.2" stroke-dasharray="1.5 5"/>
+    <text y="34" class="n">报告过期</text>
+  </g>
+  <g transform="translate(820,550)" stroke="#5C6B7D" stroke-width="1.2">
+    <line x1="0" y1="0" x2="62" y2="0"/><line x1="88" y1="0" x2="150" y2="0"/>
+    <line x1="62" y1="-5" x2="62" y2="5"/><line x1="88" y1="-5" x2="88" y2="5"/>
+    <text y="34" class="n" stroke="none">失去路径确认</text>
+  </g>
+
+  <!-- D 波段 -->
+  <text x="40" y="652" class="h">D · 他者与波段</text>
+  <text x="200" y="652" class="sub">他者没有阵营色；你看见的是它在某个波段漏出的光。</text>
+
+  <g transform="translate(100,704)">
+    <circle r="20" fill="#9AA9BA" fill-opacity="0.05" stroke="#9AA9BA" stroke-opacity="0.55"/>
+  </g>
+  <text x="134" y="708" class="n">未识别的他者泡</text>
+
+  <g transform="translate(330,704)">
+    <circle r="30" fill="url(#heat)"/><circle r="2.5" fill="#FFDDB4"/>
+  </g>
+  <text x="370" y="708" class="n">废热暴露 · 柔光晕</text>
+
+  <g transform="translate(560,704)" fill="none" stroke="#4CF2A0">
+    <circle r="2.5" fill="#4CF2A0" stroke="none"/>
+    <circle r="9" stroke-opacity="0.9"/><circle r="17" stroke-opacity="0.5"/><circle r="25" stroke-opacity="0.22"/>
+  </g>
+  <text x="596" y="708" class="n">射电信标 · 锐利同心环</text>
+
+  <g transform="translate(800,704)" fill="none" stroke="#A98BFF" stroke-width="1.3">
+    <ellipse rx="22" ry="14"/>
+    <ellipse rx="14" ry="22" stroke-dasharray="3 4" stroke-opacity="0.6"/>
+  </g>
+  <text x="832" y="708" class="n">引力波 · 四极形变环</text>
+</svg>
