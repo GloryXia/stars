@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#05070B">
+  <meta name="description" content="《光锥之外》游玩说明：延迟观测、三种信号、离线自动守护与光信机制指南。">
+  <title>游玩说明 · 光锥之外 · Beyond the Light Cone</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <script defer src="../assets/js/i18n.js"></script>
+  <script defer src="../assets/js/starfield.js"></script>
+  <script defer src="../assets/js/app.js"></script>
+</head>
+<body>
+  <canvas id="ambient-canvas" class="ambient-canvas" aria-hidden="true"></canvas>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand-link" href="../index.html">
+        <img class="brand-mark" src="../assets/img/logo-mark.svg" alt="" width="34" height="34">
+        <span class="brand-text">
+          <span class="brand-title" data-i18n="brand.title">光锥之外</span>
+          <span class="brand-sub" data-i18n="brand.sub">BEYOND THE LIGHT CONE</span>
+        </span>
+      </a>
+
+      <nav class="nav-links" aria-label="主导航">
+        <a class="nav-link" href="../index.html" data-i18n="nav.home">首页</a>
+        <a class="nav-link" href="./index.html" aria-current="page" data-i18n="nav.guide">游玩说明</a>
+        <a class="nav-link" href="../download/index.html" data-i18n="nav.download">下载应用</a>
+        <a class="nav-link" href="../login/index.html" data-i18n="nav.login">登录</a>
+        <a class="nav-link" href="../register/index.html" data-i18n="nav.register">注册</a>
+      </nav>
+
+      <div class="header-actions">
+        <a class="btn btn-primary btn-sm" href="../play/index.html" data-i18n="nav.play">进入游戏</a>
+        <button type="button" class="lang-toggle" data-lang-toggle>EN / 中文</button>
+        <button type="button" id="menu-toggle" class="menu-toggle" aria-expanded="false" aria-controls="mobile-drawer" aria-label="菜单">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <line x1="2" y1="4.5" x2="16" y2="4.5"/><line x1="2" y1="9" x2="16" y2="9"/><line x1="2" y1="13.5" x2="16" y2="13.5"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="mobile-drawer" class="mobile-drawer">
+      <nav class="mobile-drawer-nav" aria-label="移动端导航">
+        <a class="nav-link" href="../index.html" data-i18n="nav.home">首页</a>
+        <a class="nav-link" href="./index.html" aria-current="page" data-i18n="nav.guide">游玩说明</a>
+        <a class="nav-link" href="../download/index.html" data-i18n="nav.download">下载应用</a>
+        <a class="nav-link" href="../login/index.html" data-i18n="nav.login">登录</a>
+        <a class="nav-link" href="../register/index.html" data-i18n="nav.register">注册</a>
+      </nav>
+      <div class="mobile-drawer-actions">
+        <a class="btn btn-primary" href="../play/index.html" style="grid-column:1/-1;" data-i18n="nav.play">进入游戏</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div class="breadcrumb">
+          <a href="../index.html" data-i18n="nav.home">首页</a>
+          <span>/</span>
+          <span data-i18n="guide.crumb">游玩说明</span>
+        </div>
+        <span class="eyebrow" data-i18n="guide.eyebrow">GAMEPLAY GUIDE · 机制与游玩说明</span>
+        <h1 class="section-title" data-i18n="guide.title">如何观测并带领你的文明</h1>
+        <p class="section-lead" style="margin-top:10px;" data-i18n="guide.lead">这里汇集了《光锥之外》的核心游玩机制：从看懂延迟的星空，到睡前设置离线守护与查收光信。</p>
+      </div>
+    </section>
+
+    <!-- 01 · 看懂延迟的星空 -->
+    <section class="section" style="border-top:none;">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow" data-i18n="world.eyebrow">01 · 看懂延迟的星空</span>
+            <h2 class="section-title" data-i18n="world.title">从模糊感应到算清位置</h2>
+          </div>
+          <p class="section-lead" data-i18n="world.lead">你看到的每一颗星都是它的过去。未知目标会随着收集到的线索一步步清晰：</p>
+        </div>
+
+        <div class="grammar-deck">
+          <div class="panel">
+            <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center;">
+              <div class="segment-bar" role="tablist" aria-label="观测精度">
+                <button type="button" class="segment-btn" role="tab" aria-selected="true" data-grammar-stage="1" data-i18n="obs.tab1">① 模糊感应</button>
+                <button type="button" class="segment-btn" role="tab" aria-selected="false" data-grammar-stage="2" data-i18n="obs.tab2">② 锁定方向</button>
+                <button type="button" class="segment-btn" role="tab" aria-selected="false" data-grammar-stage="3" data-i18n="obs.tab3">③ 算清位置</button>
+              </div>
+              <div class="segment-bar" role="group" aria-label="视角切换">
+                <button type="button" class="segment-btn" aria-selected="true" data-grammar-view="bubble" data-i18n="obs.view.bubble">星图</button>
+                <button type="button" class="segment-btn" aria-selected="false" data-grammar-view="celestial" data-i18n="obs.view.celestial">夜空</button>
+              </div>
+            </div>
+
+            <div class="grammar-viewport">
+              <svg id="grammar-svg" class="grammar-svg" viewBox="0 0 520 170" aria-label="观测过程示意图"></svg>
+              <div class="log-box">
+                <span id="grammar-log" class="log-line">西北方向似乎有微弱动静，还看不清有多远。</span>
+                <span id="grammar-meta" class="micro">只能观望 · 无法确认目标</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:grid;gap:16px;">
+            <div class="panel">
+              <h3 class="serif" style="font-size:19px;" data-i18n="world.p1.t">舰队赶路与回信延迟</h3>
+              <p style="color:var(--ink2);font-size:14px;margin-top:8px;" data-i18n="world.p1.d">向 4 光年外的邻星派出远征舰队，飞船需要飞 40 分钟；抵达建成后，确认回信还需要 4 分钟才能飞回指挥中心。</p>
+            </div>
+            <div class="panel">
+              <h3 class="serif" style="font-size:19px;" data-i18n="world.p2.t">外围星系断联自治</h3>
+              <p style="color:var(--ink2);font-size:14px;margin-top:8px;" data-i18n="world.p2.d">当星系分布太广导致同步负担过大时，可暂时让外围星系独立运转而不必销毁，日后随时发送光速握手信号重新并网。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 · 三种宇宙信号 -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow" data-i18n="sig.eyebrow">02 · 三种宇宙信号</span>
+            <h2 class="section-title" data-i18n="sig.title">发光就会被看见，沉默也有代价</h2>
+          </div>
+          <p class="section-lead" data-i18n="sig.lead">文明的活动会化作向外扩张的信号波纹，不同通道有着截然不同的穿透力与探测范围：</p>
+        </div>
+
+        <div class="grid-3">
+          <article class="panel messenger-card">
+            <div class="messenger-accent is-em"></div>
+            <span class="chip chip-thermal" data-i18n="sig.c1.tag">电磁波 · 热与光</span>
+            <h3 class="serif" style="font-size:19px;" data-i18n="sig.c1.t">关灯也收不回过去的光</h3>
+            <svg class="messenger-svg" viewBox="0 0 300 92" fill="none" aria-hidden="true">
+              <circle cx="150" cy="46" r="38" stroke="#FF8A3D" stroke-opacity="0.32" stroke-dasharray="3 4"/>
+              <circle cx="150" cy="46" r="24" stroke="#FF8A3D" stroke-width="1.6"/>
+              <circle cx="150" cy="46" r="11" stroke="#EAF2FF" stroke-opacity="0.65" stroke-dasharray="2 3"/>
+              <circle cx="150" cy="46" r="2" fill="#5C6B7D"/>
+            </svg>
+            <p style="color:var(--ink2);font-size:14px;" data-i18n="sig.c1.d">推进尾焰与废热会持续向外扩散，直到淡入背景噪声。即使现在开启隐匿，之前飞出的光依然会形成“空心光壳”继续远去。</p>
+          </article>
+
+          <article class="panel messenger-card">
+            <div class="messenger-accent is-nu"></div>
+            <span class="chip chip-neutrino" data-i18n="sig.c2.tag">中微子 · 穿透迷雾</span>
+            <h3 class="serif" style="font-size:19px;" data-i18n="sig.c2.t">高能动静藏不住线索</h3>
+            <svg class="messenger-svg" viewBox="0 0 300 92" fill="none" aria-hidden="true">
+              <circle cx="220" cy="46" r="26" fill="#FF8A3D" fill-opacity="0.14" stroke="#FF8A3D" stroke-opacity="0.4" stroke-dasharray="2 3"/>
+              <path d="M46 46 L225 27 L225 65 Z" fill="#78C2FF" fill-opacity="0.16" stroke="#78C2FF" stroke-dasharray="3 4"/>
+              <circle cx="46" cy="46" r="2.5" fill="#6FE3FF"/>
+            </svg>
+            <p style="color:var(--ink2);font-size:14px;" data-i18n="sig.c2.d">高能聚变引擎泄出的微弱迹象能穿透尘埃与伪装，帮你察觉潜伏在亮星附近的目标，但只能给出粗略方向。</p>
+          </article>
+
+          <article class="panel messenger-card">
+            <div class="messenger-accent is-gw"></div>
+            <span class="chip chip-gw" data-i18n="sig.c3.tag">引力波 · 长期探测</span>
+            <h3 class="serif" style="font-size:19px;" data-i18n="sig.c3.t">大型建筑的跨星涟漪</h3>
+            <svg class="messenger-svg" viewBox="0 0 300 92" fill="none" aria-hidden="true">
+              <circle cx="52" cy="24" r="2.5" fill="#6FE3FF"/><circle cx="44" cy="54" r="2.5" fill="#6FE3FF"/><circle cx="72" cy="70" r="2.5" fill="#6FE3FF"/>
+              <line x1="52" y1="24" x2="220" y2="46" stroke="#A98BFF" stroke-opacity="0.45" stroke-dasharray="2 3"/>
+              <line x1="44" y1="54" x2="220" y2="46" stroke="#A98BFF" stroke-opacity="0.45" stroke-dasharray="2 3"/>
+              <line x1="72" y1="70" x2="220" y2="46" stroke="#A98BFF" stroke-opacity="0.45" stroke-dasharray="2 3"/>
+              <ellipse cx="220" cy="46" rx="22" ry="12" stroke="#A98BFF"/>
+              <ellipse cx="220" cy="46" rx="12" ry="22" stroke="#A98BFF" stroke-opacity="0.55" stroke-dasharray="3 3"/>
+              <circle cx="220" cy="46" r="2.5" fill="#EAF2FF"/>
+            </svg>
+            <p style="color:var(--ink2);font-size:14px;" data-i18n="sig.c3.d">大型奇观与终极信标会产生无法屏蔽的时空涟漪；当你在至少 3 颗不共线的恒星上同步观测，就能跨过数千光年精确定位。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03–05 · 离线托管、光信与大过滤器 -->
+    <section class="section">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow" data-i18n="off.eyebrow">03 · 离线托管与自动守护</span>
+            <h2 class="section-title" data-i18n="off.title">睡前排好计划，关掉页面照常演进</h2>
+          </div>
+          <p class="section-lead" data-i18n="off.lead">游戏时间永远以 1 分钟 = 1 年平稳流淌。离开前编排好发展队列与自动守护规则，就能安心挂机：</p>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <h3 class="serif" style="font-size:19px;" data-i18n="off.l1.title">3 条自动守护规则（可切换模式）</h3>
+            <p style="color:var(--ink2);font-size:14px;margin-top:8px;" data-i18n="off.l1.desc">提前配好触发条件与本地应急动作，在离线或值守时自动保护文明：</p>
+
+            <div class="relay-list">
+              <div class="relay-card">
+                <div class="relay-rule"><span class="chip chip-alert">01</span><span data-i18n="off.r1">发现小行星撞击预警 → 自动偏转拦截</span></div>
+                <button type="button" class="relay-mode-btn" data-mode="always">全天守护</button>
+              </div>
+              <div class="relay-card">
+                <div class="relay-rule"><span class="chip chip-thermal">02</span><span data-i18n="off.r2">散热储备快满了 → 自动开启散热</span></div>
+                <button type="button" class="relay-mode-btn" data-mode="offline">仅离线生效</button>
+              </div>
+              <div class="relay-card">
+                <div class="relay-rule"><span class="chip chip-self">03</span><span data-i18n="off.r3">协同压力过高 → 暂时断开外围星系</span></div>
+                <button type="button" class="relay-mode-btn" data-mode="offline">仅离线生效</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <article class="postmark-card">
+              <div class="postmark-top">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <svg class="postmark-waves" viewBox="0 0 72 34" fill="none" stroke="#5C6B7D" stroke-width="1.2" aria-hidden="true">
+                    <path d="M2 7 Q12 2 22 7 T42 7 T62 7 T70 7"/><path d="M2 17 Q12 12 22 17 T42 17 T62 17 T70 17"/><path d="M2 27 Q12 22 22 27 T42 27 T62 27 T70 27"/>
+                  </svg>
+                  <div>
+                    <div class="micro" data-i18n="pm.tag">04 · 光信档案（来自过去的信）</div>
+                    <div style="font-size:13px;color:var(--self);margin-top:2px;" data-i18n="pm.status">已送达</div>
+                  </div>
+                </div>
+                <div class="postmark-seal" style="white-space:pre-line;" data-i18n="pm.seal">延迟 4 年
+确认送达</div>
+              </div>
+
+              <dl class="postmark-grid">
+                <div><dt data-i18n="pm.k1">目标距离</dt><dd data-i18n="pm.v1">4.00 光年</dd></div>
+                <div><dt data-i18n="pm.k2">信号耗时</dt><dd data-i18n="pm.v2">4 分钟</dd></div>
+                <div><dt data-i18n="pm.k3">发出时间</dt><dd data-i18n="pm.v3">第 40.0 年</dd></div>
+                <div><dt data-i18n="pm.k4">收到时间</dt><dd data-i18n="pm.v4">第 44.0 年</dd></div>
+              </dl>
+
+              <p class="postmark-quote" data-i18n="pm.quote">“你现在看到的 B 星，是它 4 年前的样子。”</p>
+            </article>
+
+            <div class="panel panel-tight">
+              <h3 class="serif" style="font-size:17px;" data-i18n="filter.title">05 · 大过滤器、灭亡简报与重开</h3>
+              <p style="color:var(--ink2);font-size:13px;margin-top:8px;" data-i18n="filter.desc">没有付费免死护盾。天灾（小行星、超新星等）与内部过载危机对玩家与 AI 一视同仁。若文明毁灭，原地会留下物理废墟与信标；查收一份灭亡简报后，即可在银河系另选恒星重新开始。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="portal-cta-band">
+          <div>
+            <span class="eyebrow" data-i18n="portal.eyebrow">立即开始</span>
+            <h2 class="serif" style="font-size:24px;margin-top:8px;" data-i18n="portal.title">进入《光锥之外》</h2>
+            <p style="color:var(--ink2);font-size:14px;margin-top:8px;" data-i18n="portal.desc">电脑和手机打开网页就能玩，iOS 与安卓应用也在准备中。</p>
+          </div>
+          <div class="portal-links">
+            <a class="btn btn-primary" href="../play/index.html" data-i18n="portal.btn.play">进入游戏</a>
+            <a class="btn" href="../download/index.html" data-i18n="portal.btn.download">下载应用（iOS / 安卓）</a>
+            <a class="btn btn-subtle" href="../login/index.html" data-i18n="portal.btn.login">登录</a>
+            <a class="btn btn-subtle" href="../register/index.html" data-i18n="portal.btn.register">注册</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-bottom" style="margin-top:0;border-top:none;padding-top:0;">
+      <span data-i18n="footer.copy">© 2026 光锥之外 · Beyond the Light Cone</span>
+      <span><a href="../index.html" data-i18n="nav.home">首页</a> · <a href="../play/index.html" data-i18n="nav.play">进入游戏</a> · <a href="../download/index.html" data-i18n="nav.download">下载应用</a> · <a href="../login/index.html" data-i18n="nav.login">登录</a> · <a href="../register/index.html" data-i18n="nav.register">注册</a></span>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "schema_version": "0.2.0",
+  "scenario_id": "expedition-4ly",
+  "seed": "m1-expedition-reference-v2",
+  "description": "Tier 2 protocol fixture; not a real Tier 1 start",
+  "kappa_t": 525960,
+  "candidate_distance_ly": 4,
+  "cradle_span_ly": 0.01,
+  "expedition_speed_c": 0.1,
+  "authorization_arrival_real_s": 240,
+  "local_join_real_s": 2400,
+  "receipt_arrival_real_s": 2640,
+  "timeout_real_s": 2760
+}

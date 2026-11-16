@@ -1,20 +1,37 @@
 # 《光锥之外》
 
-一款围绕 **10 万光年永续银河**、**人类文明真实跨度**、**光锥延迟情报**与**隔绝现实喧嚣的暗室观星（闹中取静）**展开的慢节奏硬核星际演化与巡天游戏。
+一款围绕**银河系尺度（直径约 100,000 光年）**、**人类文明真实演化跨度**与**光速因果限制**构建的慢节奏星际文明演化与巡天模拟游戏。
 
-全服共处于一座**永不删档清零的 100,000 光年扁平旋臂银盘**（约 $1.5\times 10^{11}$ 颗程序化恒星，可容纳万级活跃文明席位），除时间流速锁死为**全服唯一倍率 `1 现实分钟 = 1.00 模拟年`（$1\ \mathrm{ly}$ 光行时间 $\equiv 1\ \mathrm{real\ min}$）**外，恒星间距、信号衰减与文明内部演进跨度严格对齐物理事实与人类历史。
+全服共处于一座**长期运行、不强制清档的 100,000 光年扁平旋臂银河系**（约 $1.5\times 10^{11}$ 颗程序化恒星，可容纳万级活跃文明席位）。除时间流速锁死为全服唯一倍率 **`1 现实分钟 = 1.00 模拟年`**（$1\ \mathrm{ly}$ 光行时间 $\equiv 1\ \mathrm{real\ min}$）外，恒星间距、信号衰减与文明演进跨度严格对齐物理事实与人类历史。
 
-文明从一颗摇篮恒星起步，在统一物理规律与真实大过滤器（冷战／系统过载自毁 `SDI` 与 `B1–B4` 天灾毁灭，人机同律）下演进，支持**碎片化时间参与与 100% 全速离线挂机**（内建 5 槽位预设建造队列 `build_queue` 与 3 槽确定性 L1 离线反射护航规则，由玩家提前配置 `b1_warning -> deflect_b1`、`vent_sink` 等防线）。玩家在静谧的深夜暗室天文台中调整包络半径、冲印跨越数百光年的远古光信、观测前人留下的 `信标 Lv.4` 引力波星碑或毁灭遗迹；若文明灭亡，收到一份灭亡简报后即可直接重开。
+文明从单行星摇篮起步，在统一物理规律与真实天灾／自毁风险（`SDI` 与 `B1–B4`，人机同律）下通过多行星建设与 **$0.10c$ 定向星际远征**构建离散恒星网络；文明发出的电磁波、中微子与引力波则以 **$1.00c$ 扩散衰减直至消散的多信使信号波壳**形态在银河中传播。支持全速离线演进（`allocation_plan` 托管计划、5 槽 `build_queue` 建造队列与 3 槽确定性 L1 哨兵规则）。若文明灭亡，原地留存物理遗迹与既建 `信标 Lv.4` 设施，玩家查收灭亡简报后即可另选摇篮重开。
 
-| 想查什么 | 从这里开始 |
-| --- | --- |
-| 当前核心设计 | [GDD v0.16.0](DESIGN.md) |
-| 10 万光年永续银盘、万级单图与唯一时间倍率（`1 min = 1 yr`） | [GDD §3](DESIGN.md#space-and-geometry) |
-| 三维球体因果拓扑博弈 | [GDD §4](DESIGN.md#sphere-topology) |
-| 相对论观测、定位与死后光锥回响 | [GDD §7](DESIGN.md#observation-and-combat) |
-| 万级空间分片、浮动原点、海外 Web-First + Google 登录与移动辅端 | [技术架构](docs/specs/ARCHITECTURE.md) |
-| 首个开发场景、Web 触控／键鼠交互与 M1–M2 验收 | [M1–M2 开发规格](docs/specs/M1-M2-FRONTIER.md) |
-| 闹中取静气质、色彩、图形语法、静谧 HUD 与正念交互预留 | [美学设计（Art Direction v0.2）](docs/specs/AESTHETICS.md) |
-| 席位契约、预设建造队列、L1 离线护航与预留 Agent 扩展总线 | [席位契约规格（v0.16.0）](docs/specs/SEAT-CONTRACT.md) |
-| 人类生产力经验拟合、全席位统一大过滤器标定与 6 联曲线 | [数值标定仿真脚本（v0.16.0 §9.2）](scripts/calibration/README.md) |
-| 历史归档与审阅报告 | [v0.9.3-lean](docs/archive/GDD-v0.9.3-lean.md) · [MCP v0.14.0 延迟规格](docs/archive/MCP-v0.14.0-deferred.md) · [v0.9.2 复审](docs/reviews/GDD-v0.9.2-review-and-revision-plan.md) · [v0.9.1 原稿](docs/archive/GDD-v0.9.1.md) |
+---
+
+## 文档与工程目录
+
+| 分类 | 内容 | 入口 |
+| --- | --- | --- |
+| **核心游戏设计** | 世界尺度、离散星网、多信使波壳、生产力曲线、SDI 与 B1–B4 天灾规则 | [GDD v0.17.0](DESIGN.md) |
+| **技术架构** | 银河系万级分片架构、浮动原点、海外 Web-First + OIDC 登录与移动辅端 | [技术架构](docs/specs/ARCHITECTURE.md) |
+| **席位契约** | 同口径只读投影、局部 $SO(3)$ 坐标系、10 项幂等指令与 L1 / Agent 边界 | [席位契约规格（v0.17.0）](docs/specs/SEAT-CONTRACT.md) |
+| **首个开发切片** | 4 光年定向远征场景、双视角交互流程与 M1–M2 自动化验收 | [M1–M2 开发规格](docs/specs/M1-M2-FRONTIER.md) |
+| **界面与视听规范** | 航天遥测 HUD 布局、配色与面积配比、确定性图形语法与 `zh-CN`/`en` 双语规范 | [美学设计（Art Direction v0.3）](docs/specs/AESTHETICS.md) |
+| **当前实施基线** | 当前仓库代码边界、M1/M2 已实现范围与延后项说明 | [框架实施基线](docs/implementation/FOUNDATION.md) |
+| **静态官网与游玩说明** | 独立官网目录（含登录、注册、进入游戏、iOS/安卓下载预留路由及 `/guide/` 游玩说明） | [官网目录](website/README.md) |
+| **数值标定** | 人类历史生产力经验拟合、全席位统一大过滤器标定与 6 联曲线 | [数值标定说明](scripts/calibration/README.md) |
+| **历史归档与复审** | 早期设计稿、延迟规格与设计复审记录 | [v0.9.3-lean](docs/archive/GDD-v0.9.3-lean.md) · [MCP v0.14.0](docs/archive/MCP-v0.14.0-deferred.md) · [v0.16.0 复审](docs/reviews/GDD-v0.16.0-review.md) · [v0.9.2 复审](docs/reviews/GDD-v0.9.2-review-and-revision-plan.md) |
+
+---
+
+## 代码目录结构
+
+- `packages/sim-core`：无 UI/网络依赖的确定性仿真内核（双时钟、定向远征、波壳衰减、队列与事件队列）。
+- `packages/contracts`：席位视图投影、幂等指令信封与运行时 Schema 校验。
+- `packages/database`：PostgreSQL 稀疏增量持久化迁移与事务仓储。
+- `packages/ui-tokens` / `packages/i18n`：CSS 与 Three.js 共用的视觉令牌、`zh-CN`/`en` 双语字典。
+- `apps/game-server`：Fastify HTTP/API 边界与开发鉴权适配器（M3 扩展为 OIDC / WSS 分片网关）。
+- `apps/web-client`：Web-First 主端（TypeScript + Three.js WebGL2 浮动原点 + 响应式 HUD）。
+- `apps/sim-cli` / `scenarios/m1`：M1 确定性时间线夹具与命令行复跑。
+- `apps/capacitor-shell`：M4 iOS / Android 原生壳端预留目录。
+- `website/`：独立静态官网与玩法说明站点（零构建依赖，可直接静态托管）。

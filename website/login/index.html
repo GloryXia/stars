@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#05070B">
+  <title>登录 · 光锥之外 · Beyond the Light Cone</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
+  <link rel="stylesheet" href="../assets/css/main.css">
+  <script defer src="../assets/js/i18n.js"></script>
+  <script defer src="../assets/js/starfield.js"></script>
+  <script defer src="../assets/js/app.js"></script>
+</head>
+<body>
+  <canvas id="ambient-canvas" class="ambient-canvas" aria-hidden="true"></canvas>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand-link" href="../index.html">
+        <img class="brand-mark" src="../assets/img/logo-mark.svg" alt="" width="34" height="34">
+        <span class="brand-text">
+          <span class="brand-title" data-i18n="brand.title">光锥之外</span>
+          <span class="brand-sub" data-i18n="brand.sub">BEYOND THE LIGHT CONE</span>
+        </span>
+      </a>
+
+      <nav class="nav-links" aria-label="主导航">
+        <a class="nav-link" href="../index.html" data-i18n="nav.home">首页</a>
+        <a class="nav-link" href="../guide/index.html" data-i18n="nav.guide">游玩说明</a>
+        <a class="nav-link" href="../download/index.html" data-i18n="nav.download">下载应用</a>
+        <a class="nav-link" href="./index.html" aria-current="page" data-i18n="nav.login">登录</a>
+        <a class="nav-link" href="../register/index.html" data-i18n="nav.register">注册</a>
+      </nav>
+
+      <div class="header-actions">
+        <a class="btn btn-primary btn-sm" href="../play/index.html" data-i18n="nav.play">进入游戏</a>
+        <button type="button" class="lang-toggle" data-lang-toggle>EN / 中文</button>
+        <button type="button" id="menu-toggle" class="menu-toggle" aria-expanded="false" aria-controls="mobile-drawer" aria-label="菜单">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <line x1="2" y1="4.5" x2="16" y2="4.5"/><line x1="2" y1="9" x2="16" y2="9"/><line x1="2" y1="13.5" x2="16" y2="13.5"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="mobile-drawer" class="mobile-drawer">
+      <nav class="mobile-drawer-nav" aria-label="移动端导航">
+        <a class="nav-link" href="../index.html" data-i18n="nav.home">首页</a>
+        <a class="nav-link" href="../guide/index.html" data-i18n="nav.guide">游玩说明</a>
+        <a class="nav-link" href="../download/index.html" data-i18n="nav.download">下载应用</a>
+        <a class="nav-link" href="./index.html" aria-current="page" data-i18n="nav.login">登录</a>
+        <a class="nav-link" href="../register/index.html" data-i18n="nav.register">注册</a>
+      </nav>
+      <div class="mobile-drawer-actions">
+        <a class="btn btn-primary" href="../play/index.html" style="grid-column:1/-1;" data-i18n="nav.play">进入游戏</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div class="breadcrumb">
+          <a href="../index.html" data-i18n="nav.home">首页</a>
+          <span>/</span>
+          <span data-i18n="login.crumb">登录</span>
+        </div>
+        <span class="eyebrow" data-i18n="login.eyebrow">账号登录 · 预留页面</span>
+        <h1 class="section-title" data-i18n="login.title">登录你的观星账号</h1>
+        <p class="section-lead" style="margin-top:10px;" data-i18n="login.lead">网页版、iOS 和安卓将共用同一个账号。目前为官网预留入口，正式服上线后开放登录。</p>
+      </div>
+    </section>
+
+    <section class="container auth-layout">
+      <div class="panel">
+        <div class="oauth-stack">
+          <button type="button" class="btn oauth-btn" data-oauth-provider="google">
+            <span class="oauth-btn-left">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true">
+                <circle cx="8" cy="8" r="6"/><path d="M8 8h5.5"/>
+              </svg>
+              <span data-i18n="login.google">使用 Google 账号登录</span>
+            </span>
+            <span class="chip chip-pending" data-i18n="login.reservedTag">即将开放</span>
+          </button>
+
+          <button type="button" class="btn oauth-btn" data-oauth-provider="apple">
+            <span class="oauth-btn-left">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true">
+                <rect x="3" y="4" width="10" height="9" rx="3"/><path d="M8 2.5v1.5"/>
+              </svg>
+              <span data-i18n="login.apple">使用 Apple 账号登录</span>
+            </span>
+            <span class="chip chip-pending" data-i18n="login.reservedTag">即将开放</span>
+          </button>
+        </div>
+
+        <div class="divider-line" data-i18n="login.divider">或使用邮箱密码登录</div>
+
+        <form id="login-form" class="form-stack" novalidate>
+          <div class="field">
+            <label for="login-email"><span data-i18n="login.email">邮箱</span></label>
+            <input id="login-email" class="input" type="email" autocomplete="email" data-i18n-placeholder="login.email.ph" placeholder="name@example.com" required>
+          </div>
+          <div class="field">
+            <label for="login-pass"><span data-i18n="login.pass">密码</span></label>
+            <input id="login-pass" class="input" type="password" autocomplete="current-password" data-i18n-placeholder="login.pass.ph" placeholder="请输入密码" required>
+          </div>
+          <label class="checkbox-row">
+            <input type="checkbox" checked>
+            <span data-i18n="login.remember">记住登录状态</span>
+          </label>
+          <button type="submit" class="btn btn-primary" data-i18n="login.submit">登录（预留入口）</button>
+        </form>
+
+        <div id="login-status" class="status-log" role="status" aria-live="polite" data-i18n="login.status.idle">当前为预留登录页，正式账号服务将在在线服阶段接入。</div>
+      </div>
+
+      <aside class="panel" style="display:grid;gap:16px;">
+        <div>
+          <h2 class="serif" style="font-size:20px;" data-i18n="login.side.title">关于账号与进度</h2>
+          <p style="color:var(--ink2);font-size:14px;margin-top:10px;" data-i18n="login.side.p1">你的文明进度、离线规则与未读光信都会保存在云端，换设备登录也能无缝接着看。</p>
+          <p style="color:var(--ink2);font-size:14px;margin-top:10px;" data-i18n="login.side.p2">如果离线期间文明遭遇天灾或危机而灭亡，重新登录时会收到一份简洁的灭亡简报，之后可以直接重开。</p>
+        </div>
+
+        <div style="border-top:1px solid var(--rule);padding-top:16px;display:grid;gap:10px;">
+          <p style="font-size:13px;color:var(--ink2);" data-i18n="login.side.noAccount">还没有账号？</p>
+          <a class="btn" href="../register/index.html" data-i18n="login.side.toReg">去注册新账号</a>
+          <a class="btn btn-subtle" href="../play/index.html" data-i18n="login.side.toPlay">免登录 · 先去试玩当前版本</a>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-bottom" style="margin-top:0;border-top:none;padding-top:0;">
+      <span data-i18n="footer.copy">© 2026 光锥之外 · Beyond the Light Cone</span>
+      <span><a href="../index.html" data-i18n="nav.home">首页</a> · <a href="../register/index.html" data-i18n="nav.register">注册</a> · <a href="../play/index.html" data-i18n="nav.play">进入游戏</a> · <a href="../download/index.html" data-i18n="nav.download">下载应用</a></span>
+    </div>
+  </footer>
+</body>
+</html>

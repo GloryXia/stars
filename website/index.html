@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#05070B">
+  <meta name="description" content="《光锥之外》Beyond the Light Cone — 银河系尺度文明演化模拟。">
+  <title>光锥之外 · Beyond the Light Cone</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/img/favicon.svg">
+  <link rel="stylesheet" href="./assets/css/main.css">
+  <script defer src="./assets/js/i18n.js"></script>
+  <script defer src="./assets/js/starfield.js"></script>
+  <script defer src="./assets/js/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand-link" href="./index.html" aria-label="光锥之外 首页">
+        <img class="brand-mark" src="./assets/img/logo-mark.svg" alt="" width="34" height="34">
+        <span class="brand-text">
+          <span class="brand-title" data-i18n="brand.title">光锥之外</span>
+          <span class="brand-sub" data-i18n="brand.sub">BEYOND THE LIGHT CONE</span>
+        </span>
+      </a>
+
+      <nav class="nav-links" aria-label="主导航">
+        <a class="nav-link" href="#cosmos" data-i18n="nav.cosmos">银河模拟</a>
+        <a class="nav-link" href="#features" data-i18n="nav.features">游戏特色</a>
+        <a class="nav-link" href="./guide/index.html" data-i18n="nav.guide">游玩说明</a>
+      </nav>
+
+      <div class="header-actions">
+        <a class="nav-link hide-mobile" href="./download/index.html" data-i18n="nav.download">下载应用</a>
+        <a class="nav-link hide-mobile" href="./login/index.html" data-i18n="nav.login">登录</a>
+        <a class="btn btn-subtle btn-sm hide-mobile" href="./register/index.html" data-i18n="nav.register">注册</a>
+        <a class="btn btn-primary btn-sm" href="./play/index.html" data-i18n="nav.play">进入游戏</a>
+        <button type="button" class="lang-toggle" data-lang-toggle>EN / 中文</button>
+        <button type="button" id="menu-toggle" class="menu-toggle" aria-expanded="false" aria-controls="mobile-drawer" aria-label="菜单">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+            <line x1="2" y1="4.5" x2="16" y2="4.5"/><line x1="2" y1="9" x2="16" y2="9"/><line x1="2" y1="13.5" x2="16" y2="13.5"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="mobile-drawer" class="mobile-drawer">
+      <nav class="mobile-drawer-nav" aria-label="移动端导航">
+        <a class="nav-link" href="#cosmos" data-i18n="nav.cosmos">银河模拟</a>
+        <a class="nav-link" href="#features" data-i18n="nav.features">游戏特色</a>
+        <a class="nav-link" href="./guide/index.html" data-i18n="nav.guide">游玩说明</a>
+      </nav>
+      <div class="mobile-drawer-actions">
+        <a class="btn btn-subtle" href="./login/index.html" data-i18n="nav.login">登录</a>
+        <a class="btn btn-subtle" href="./register/index.html" data-i18n="nav.register">注册</a>
+        <a class="btn btn-subtle" href="./download/index.html" data-i18n="nav.download">下载应用</a>
+        <a class="btn btn-primary" href="./play/index.html" data-i18n="nav.play">进入游戏</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero 银河系文明模拟 -->
+    <section id="hero-stage" class="hero">
+      <canvas id="hero-canvas" class="hero-canvas" aria-hidden="true"></canvas>
+
+      <div class="container hero-telemetry-top">
+        <div class="telemetry-pill-group">
+          <div class="telemetry-pill">
+            <span data-i18n="hero.simLabel">游戏时间</span>
+            <strong id="hero-sim-time">T+ 18.0 YR</strong>
+          </div>
+          <div class="telemetry-pill">
+            <span data-i18n="hero.rateLabel">时间尺标</span>
+            <strong data-i18n="hero.rateValue">1 分钟 = 1 年</strong>
+          </div>
+        </div>
+        <button type="button" id="pure-sky-btn" class="pure-sky-btn" aria-pressed="false" data-i18n="hero.puresky">只看星空</button>
+      </div>
+
+      <div class="container hero-content">
+        <span class="eyebrow" data-i18n="hero.eyebrow">银河系尺度 · 文明演化模拟</span>
+        <h1 class="hero-title" data-i18n="hero.title">所见皆往昔，<br>在真实银河里演化文明。</h1>
+        <p class="hero-subtitle" data-i18n="hero.subtitle">从一颗行星出发，在 1 分钟等于 1 年的时间尺度里探索、远征，等待跨越光年的星光抵达。</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="./play/index.html" data-i18n="hero.cta.play">进入游戏</a>
+          <a class="btn" href="./download/index.html" data-i18n="hero.cta.download">下载应用（iOS / 安卓）</a>
+          <a class="btn btn-subtle" href="./login/index.html" data-i18n="hero.cta.login">登录</a>
+          <a class="btn btn-subtle" href="./register/index.html" data-i18n="hero.cta.register">注册</a>
+        </div>
+      </div>
+
+      <div class="container hero-telemetry-bottom">
+        <div class="telemetry-strip is-3col">
+          <div class="telemetry-cell">
+            <div class="telemetry-value"><span data-i18n="stat.1.num">银河系尺度</span> <span class="telemetry-unit" data-i18n="stat.1.unit">约 10 万光年</span></div>
+            <span class="telemetry-caption" data-i18n="stat.1.label">同一世界长期运行，不强制删档重置</span>
+          </div>
+          <div class="telemetry-cell">
+            <div class="telemetry-value"><span data-i18n="stat.2.num">万人</span> <span class="telemetry-unit" data-i18n="stat.2.unit">同图</span></div>
+            <span class="telemetry-caption" data-i18n="stat.2.label">玩家与生态文明异步发展，各自留存历史</span>
+          </div>
+          <div class="telemetry-cell">
+            <div class="telemetry-value"><span data-i18n="stat.3.num">1 分钟</span> <span class="telemetry-unit" data-i18n="stat.3.unit">= 1 年</span></div>
+            <span class="telemetry-caption" data-i18n="stat.3.label">星光与航程遵循真实距离，匀速推进</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 01 · 宇宙文明模拟 -->
+    <section id="cosmos" class="section">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow" data-i18n="cosmos.eyebrow">01 · 宇宙文明模拟</span>
+            <h2 class="section-title" data-i18n="cosmos.title">同一座银河系，按现实物理运行</h2>
+          </div>
+          <p class="section-lead" data-i18n="cosmos.lead">没有固定剧本。所有文明在同一套物理法则下从母星起步。</p>
+        </div>
+
+        <div class="grid-3">
+          <article class="panel messenger-card">
+            <div class="messenger-accent is-nu"></div>
+            <span class="chip chip-self" data-i18n="cosmos.c1.tag">真实尺度</span>
+            <h3 class="serif" style="font-size:20px;" data-i18n="cosmos.c1.t">按人类历史的跨度生长</h3>
+            <p style="color:var(--ink2);font-size:14px;" data-i18n="cosmos.c1.d">从母星摇篮起步，历经几个世纪积累迈向多行星与跨星远征，每一步都承载真实的文明体量。</p>
+          </article>
+
+          <article class="panel messenger-card">
+            <div class="messenger-accent is-em"></div>
+            <span class="chip chip-thermal" data-i18n="cosmos.c2.tag">光速因果</span>
+            <h3 class="serif" style="font-size:20px;" data-i18n="cosmos.c2.t">光速决定你能看见什么</h3>
+            <p style="color:var(--ink2);font-size:14px;" data-i18n="cosmos.c2.d">宇宙里没有全图透视。无论舰队还是远方星光，都必须跨越漫长真空才能抵达眼前。</p>
+          </article>
+
+          <article class="panel messenger-card">
+            <div class="messenger-accent is-gw"></div>
+            <span class="chip chip-gw" data-i18n="cosmos.c3.tag">长期留存</span>
+            <h3 class="serif" style="font-size:20px;" data-i18n="cosmos.c3.t">发展与遗迹留在世界里</h3>
+            <p style="color:var(--ink2);font-size:14px;" data-i18n="cosmos.c3.d">无论文明延续还是毁灭，建成的信标、废墟与已发出的信号都会继续留在银河系中等待后人发现。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 · 游戏特色 -->
+    <section id="features" class="section">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow" data-i18n="feat.eyebrow">02 · 游戏特色</span>
+            <h2 class="section-title" data-i18n="feat.title">真实尺度下的星际博弈</h2>
+          </div>
+          <p class="section-lead" data-i18n="feat.lead">围绕观测、信号与长期演化构建的慢节奏策略体验。</p>
+        </div>
+
+        <div class="grid-2">
+          <article class="panel">
+            <h3 class="serif" style="font-size:20px;" data-i18n="feat.f1.t">双视角星际观测</h3>
+            <p style="color:var(--ink2);font-size:14px;margin-top:8px;" data-i18n="feat.f1.d">在环顾全天的「夜空视角」与俯瞰星系脉络的「三维星图」之间切换，从微弱线索一步步锁定坐标。</p>
+          </article>
+
+          <article class="panel">
+            <h3 class="serif" style="font-size:20px;" data-i18n="feat.f2.t">暴露与隐匿的博弈</h3>
+            <p style="color:var(--ink2);font-size:14px;margin-top:8px;" data-i18n="feat.f2.d">扩张与高耗能活动会让信号传播得更远，而收敛隐匿也会付出代价——何时发光由你决定。</p>
+          </article>
+
+          <article class="panel">
+            <h3 class="serif" style="font-size:20px;" data-i18n="feat.f3.t">不强制盯屏的长期演化</h3>
+            <p style="color:var(--ink2);font-size:14px;margin-top:8px;" data-i18n="feat.f3.d">宇宙时间恒定匀速推进，支持全速离线发展；提前编排发展计划与自动防御规则，从容跨天体演进。</p>
+          </article>
+
+          <article class="panel">
+            <h3 class="serif" style="font-size:20px;" data-i18n="feat.f4.t">人机同律的真实命运</h3>
+            <p style="color:var(--ink2);font-size:14px;margin-top:8px;" data-i18n="feat.f4.d">没有付费免死护盾。天灾与内部过载对所有人一视同仁；文明覆灭后可在银河系另择恒星重新开始。</p>
+          </article>
+        </div>
+
+        <!-- 游玩指南跳转横幅 -->
+        <div class="panel panel-tight" style="margin-top:24px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;border-color:var(--selfDim);">
+          <div>
+            <span class="micro" data-i18n="guideCta.eyebrow">GAMEPLAY MANUAL · 游玩指南</span>
+            <h3 class="serif" style="font-size:19px;margin-top:4px;" data-i18n="guideCta.title">想了解具体怎么玩？</h3>
+            <p style="color:var(--ink2);font-size:13px;margin-top:4px;" data-i18n="guideCta.desc">观测步骤、信号传播、离线托管与“光信”机制，已整理在独立的游玩说明文档中。</p>
+          </div>
+          <a class="btn" href="./guide/index.html" data-i18n="guideCta.btn">查看游玩说明 →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 底部入口 -->
+    <section class="section">
+      <div class="container">
+        <div class="portal-cta-band">
+          <div>
+            <span class="eyebrow" data-i18n="portal.eyebrow">立即开始</span>
+            <h2 class="serif" style="font-size:26px;margin-top:8px;" data-i18n="portal.title">进入《光锥之外》</h2>
+            <p style="color:var(--ink2);font-size:14px;margin-top:8px;" data-i18n="portal.desc">电脑和手机打开网页就能玩，iOS 与安卓应用也在准备中。</p>
+          </div>
+          <div class="portal-links">
+            <a class="btn btn-primary" href="./play/index.html" data-i18n="portal.btn.play">进入游戏</a>
+            <a class="btn" href="./download/index.html" data-i18n="portal.btn.download">下载应用（iOS / 安卓）</a>
+            <a class="btn btn-subtle" href="./login/index.html" data-i18n="portal.btn.login">登录</a>
+            <a class="btn btn-subtle" href="./register/index.html" data-i18n="portal.btn.register">注册</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a class="brand-link" href="./index.html">
+            <img class="brand-mark" src="./assets/img/logo-mark.svg" alt="" width="28" height="28">
+            <span class="brand-text">
+              <span class="brand-title" data-i18n="brand.title">光锥之外</span>
+              <span class="brand-sub" data-i18n="brand.sub">BEYOND THE LIGHT CONE</span>
+            </span>
+          </a>
+          <p style="color:var(--ink2);font-size:13px;margin-top:12px;max-width:300px;" data-i18n="footer.desc">银河系尺度文明演化模拟 · 1 分钟 = 1 年。</p>
+        </div>
+
+        <div class="footer-col">
+          <h3 data-i18n="footer.col1">常用入口</h3>
+          <ul>
+            <li><a href="./play/index.html" data-i18n="portal.btn.play">进入游戏</a></li>
+            <li><a href="./download/index.html" data-i18n="portal.btn.download">下载应用（iOS / 安卓）</a></li>
+            <li><a href="./login/index.html" data-i18n="portal.btn.login">登录</a></li>
+            <li><a href="./register/index.html" data-i18n="portal.btn.register">注册</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h3 data-i18n="footer.col2">了解游戏</h3>
+          <ul>
+            <li><a href="#cosmos" data-i18n="nav.cosmos">银河模拟</a></li>
+            <li><a href="#features" data-i18n="nav.features">游戏特色</a></li>
+            <li><a href="./guide/index.html" data-i18n="nav.guide">游玩说明</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h3 data-i18n="footer.col3">支持平台</h3>
+          <ul style="color:var(--ink3);">
+            <li data-i18n="footer.l.web">电脑 / 手机网页版（免安装）</li>
+            <li data-i18n="footer.l.ios">iOS 应用（即将推出）</li>
+            <li data-i18n="footer.l.android">安卓应用（即将推出）</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span data-i18n="footer.copy">© 2026 光锥之外 · Beyond the Light Cone</span>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,16 @@
+import { createDatabasePool } from '@stars/database';
+import { createApp } from './app.js';
+import { PostgresSeatRepository } from './repository.js';
+const host=process.env.HOST??'127.0.0.1';
+if(process.env.NODE_ENV==='production'||process.env.DEV_AUTH_ENABLED!=='true'||!['127.0.0.1','::1'].includes(host))throw new Error('This foundation server requires explicit development auth and loopback binding; production OIDC is not implemented.');
+const devToken=process.env.DEV_AUTH_TOKEN??'';
+if(devToken.length<32)throw new Error('Set DEV_AUTH_TOKEN to at least 32 characters.');
+if(!process.env.DATABASE_URL)throw new Error('DATABASE_URL is required. Run db:migrate and db:seed first.');
+const pool=createDatabasePool(process.env.DATABASE_URL);
+const {app,tick}=createApp({repository:new PostgresSeatRepository(pool),devToken,logger:true});
+await tick();
+const timer=setInterval(()=>{void tick().catch(error=>app.log.error(error,'fixture worker tick failed'));},1000);
+timer.unref();
+app.addHook('onClose',async()=>{clearInterval(timer);await pool.end();});
+for(const signal of ['SIGINT','SIGTERM'] as const)process.once(signal,()=>{void app.close();});
+await app.listen({host,port:Number(process.env.PORT??3000)});

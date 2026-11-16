@@ -1,0 +1,28 @@
+{
+  "name": "beyond-the-lightcone",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.15.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "pnpm fixtures && pnpm --parallel --filter @stars/game-server --filter @stars/web-client dev",
+    "build": "pnpm fixtures && pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest run",
+    "check": "pnpm typecheck && pnpm test && pnpm build",
+    "db:up": "docker compose -f infra/compose.yaml up -d",
+    "db:migrate": "pnpm --filter @stars/database migrate",
+    "db:seed": "pnpm --filter @stars/database seed",
+    "sim:m1": "pnpm --filter @stars/sim-cli start",
+    "fixtures": "pnpm sim:m1 && node scripts/export-web-fixtures.mjs",
+    "dev:web": "pnpm fixtures && pnpm --filter @stars/web-client dev"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "~5.9.3",
+    "tsx": "^4.20.0",
+    "vitest": "^3.2.4"
+  }
+}

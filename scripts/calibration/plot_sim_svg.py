@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Generate dark-mode 6-panel calibration SVG from sim_results.json (GDD v0.15.0).
+Generate dark-mode 6-panel calibration SVG from sim_results.json (GDD v0.17.0).
 Includes survival, scale trajectory K(t), non-linear point speed v_E(t),
-cumulative evolution points E_cum(t), systemic fragility SDI(t), and neighbor lock rate.
+cumulative evolution points E_cum(t), systemic fragility SDI(t), and multi-messenger lock rate.
 """
 from __future__ import annotations
 
@@ -57,7 +57,7 @@ def main() -> None:
         '</style>',
         '</defs>',
         f'<rect width="{W}" height="{H}" fill="#0B1018"/>',
-        '<text x="75" y="34" class="title">Beyond the Light Cone (GDD v0.15.0) — 5-Strategy Monte Carlo Ensemble (N = 1,000 / strategy)</text>',
+        '<text x="75" y="34" class="title">Beyond the Light Cone (GDD v0.17.0) — 5-Strategy Monte Carlo Ensemble (N = 1,000 / strategy, Unattended No-L1)</text>',
         (
             f'<text x="75" y="54" class="subtitle">'
             f'Human Curve Fit R2_log = {fit["r2_log"]:.4f} | '
@@ -88,7 +88,7 @@ def main() -> None:
         ("C. Mean Point Accrual Speed  v_E(t)  [pts / 100 sim yr]", 75, 474, 455, 260, 0.0, 3.0, "", "mean_v_e"),
         ("D. Mean Cumulative Earned Points  E_cum(t)", 625, 474, 455, 260, 0.0, 100.0, " pts", "mean_e_cum"),
         ("E. Mean Systemic Fragility  SDI(t)", 75, 814, 455, 260, 0.0, 100.0, "%", "mean_sdi"),
-        ("F. Cumulative Neighbor Lock Rate  P(Lock)", 625, 814, 455, 260, 0.0, 25.0, "%", "lock_pct"),
+        ("F. Multi-Messenger Neighbor Lock Rate  P(Lock)", 625, 814, 455, 260, 0.0, 60.0, "%", "lock_pct"),
     ]
 
     y_ticks_map = {
@@ -97,7 +97,7 @@ def main() -> None:
         "mean_v_e": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0],
         "mean_e_cum": [0, 25, 50, 75, 100],
         "mean_sdi": [0, 20, 40, 60, 80, 100],
-        "lock_pct": [0, 5, 10, 15, 20, 25],
+        "lock_pct": [0, 15, 30, 45, 60],
     }
 
     for title, px, py, pw, ph, ymin, ymax, unit, field in panels:
@@ -133,29 +133,43 @@ def main() -> None:
             c = curves[key]
             pts = []
             for tv, yv in zip(c["t"], c[field]):
+                if yv is None:
+                    continue
                 xx = lerp_x(tv, px, pw)
                 yy = lerp_y(yv, ymin, ymax, py, ph)
                 pts.append(f"{xx:.1f},{yy:.1f}")
             dash_attr = f' stroke-dasharray="{dash}"' if dash != "none" else ""
-            svg.append(f'<polyline fill="none" stroke="{color}" stroke-width="2.2"{dash_attr} points="{" ".join(pts)}"/>')
+            if pts:
+                svg.append(f'<polyline fill="none" stroke="{color}" stroke-width="2.2"{dash_attr} points="{" ".join(pts)}"/>')
 
-        # Panel annotations
+        # Panel annotations (read dynamically from sim_results.json, aligned beside each curve)
         if field == "surv_pct":
-            svg.append(f'<text x="{px + 280}" y="{py + 88}" class="note" style="fill:#4CF2A0">Balanced: 62.2%</text>')
-            svg.append(f'<text x="{px + 280}" y="{py + 128}" class="note" style="fill:#C084FC">Obs-Rusher: 48.1%</text>')
-            svg.append(f'<text x="{px + 280}" y="{py + 150}" class="note" style="fill:#38BDF8">System Hermit (B4): 27.2%</text>')
-            svg.append(f'<text x="{px + 12}" y="{py + 226}" class="note" style="fill:#F59E0B">Expander: 12.1% (Cold War)</text>')
-            svg.append(f'<text x="{px + 12}" y="{py + 242}" class="note" style="fill:#F43F5E">Planet Hermit: 6.4% (B1b + B4)</text>')
+            regimes = data.get("regime_comparison", {})
+            annots = [
+                ("balanced", "Balanced", 62, "#4CF2A0"),
+                ("system_hermit", "System Hermit", 112, "#38BDF8"),
+                ("expander", "Expander", 150, "#F59E0B"),
+                ("obs_rusher", "Obs-Rusher", 188, "#C084FC"),
+                ("planet_hermit", "Planet Hermit", 232, "#F43F5E"),
+            ]
+            for s_key, s_name, y_off, col in annots:
+                s_no_l1 = summary[s_key]["survival_5000yr"] * 100.0
+                s_l1 = regimes.get(s_key, {}).get("l1_armed_with_plan", {}).get("surv_5000yr")
+                l1_txt = f" (L1: {s_l1 * 100.0:.1f}%)" if s_l1 is not None else ""
+                x_off = px + 258
+                svg.append(f'<text x="{x_off}" y="{py + y_off}" class="note" style="fill:{col}">{s_name}: {s_no_l1:.1f}%{l1_txt}</text>')
         elif field == "mean_v_e":
             svg.append(f'<text x="{px + 12}" y="{py + 20}" class="note">Ensemble mean of +/-65% OU, harmonic &amp; jump ripples</text>')
         elif field == "mean_sdi":
-            svg.append(f'<text x="{px + 12}" y="{py + 20}" class="note">Threshold >= 45% triggers Cold War fragility risk</text>')
-            ry_sdi = lerp_y(45.0, ymin, ymax, py, ph)
+            svg.append(f'<text x="{px + 12}" y="{py + 20}" class="note">Threshold &gt;= 38% triggers Cold War fragility risk</text>')
+            ry_sdi = lerp_y(38.0, ymin, ymax, py, ph)
             svg.append(f'<line x1="{px}" y1="{ry_sdi:.1f}" x2="{px + pw}" y2="{ry_sdi:.1f}" stroke="#F59E0B" stroke-width="1" stroke-dasharray="4,3" opacity="0.65"/>')
+        elif field == "lock_pct":
+            svg.append(f'<text x="{px + 12}" y="{py + 20}" class="note">EM (R_diss) + 1/r GW &gt;=3-star triangulation</text>')
 
     svg.append(
         f'<text x="75" y="{H - 22}" class="note">'
-        f'Sim Engine: scripts/calibration/sim_civ_dynamics.py (GDD v0.15.0, pure mathematical growth model) | Horizon 5,000 sim yr | dt = 10y'
+        f'Sim Engine: scripts/calibration/sim_civ_dynamics.py (GDD v0.17.0, multi-messenger EM/nu/GW + directed 0.10c expeditions) | Horizon 5,000 sim yr | dt = 5y'
         f'</text>'
     )
     svg.append('</svg>')
