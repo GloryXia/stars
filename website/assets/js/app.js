@@ -8,12 +8,21 @@
     authRegister: '/auth/register',
     wsGateway: 'wss://gateway.beyondlightcone.org/ws',
     webClientDev: 'http://127.0.0.1:5178',
-    webClientDist: '../apps/web-client/dist/index.html',
+    webClientDist: '../apps/web-client/dist/',
     iosAppStore: null,
     iosTestFlight: null,
     androidPlay: null,
     androidApk: null
   };
+
+  function initCleanRoutes() {
+    if (!/^https?:$/i.test(window.location.protocol)) return;
+    const { pathname, search, hash } = window.location;
+    if (/\/index\.html$/i.test(pathname)) {
+      const cleanPath = pathname.replace(/index\.html$/i, '') || '/';
+      window.history.replaceState(null, '', cleanPath + search + hash);
+    }
+  }
 
   function initHeaderAndLang() {
     if (window.StarsI18n) {
@@ -370,21 +379,22 @@
       document.querySelectorAll('.nav-links a.nav-link, .mobile-drawer-nav a.nav-link')
     ).filter((link) => {
       const href = link.getAttribute('href');
-      return href === './index.html' || trackedHashes.includes(href);
+      return link.getAttribute('data-i18n') === 'nav.home' || trackedHashes.includes(href);
     });
 
     if (!navLinks.length) return;
 
-    let activeHref = '';
-    let lockedHref = null;
+    let activeKey = '';
+    let lockedKey = null;
     let lockTimer = null;
     let rafPending = false;
 
-    const setActiveHref = (targetHref) => {
-      if (activeHref === targetHref) return;
-      activeHref = targetHref;
+    const setActiveKey = (targetKey) => {
+      if (activeKey === targetKey) return;
+      activeKey = targetKey;
       navLinks.forEach((link) => {
-        if (link.getAttribute('href') === targetHref) {
+        const key = link.getAttribute('data-i18n') === 'nav.home' ? 'home' : link.getAttribute('href');
+        if (key === targetKey) {
           link.setAttribute('aria-current', 'page');
         } else {
           link.removeAttribute('aria-current');
@@ -392,7 +402,7 @@
       });
     };
 
-    const resolveScrollHref = () => {
+    const resolveScrollKey = () => {
       const header = document.querySelector('.site-header');
       const headerHeight = header ? header.offsetHeight : 68;
       const triggerY = headerHeight + Math.min(180, window.innerHeight * 0.24);
@@ -406,7 +416,7 @@
         }
       }
 
-      let resolved = './index.html';
+      let resolved = 'home';
       for (const section of sections) {
         if (section.el.getBoundingClientRect().top <= triggerY) {
           resolved = section.hash;
@@ -416,16 +426,16 @@
     };
 
     const syncFromScroll = () => {
-      if (lockedHref) return;
-      setActiveHref(resolveScrollHref());
+      if (lockedKey) return;
+      setActiveKey(resolveScrollKey());
     };
 
-    const lockTarget = (targetHref) => {
-      lockedHref = targetHref;
-      setActiveHref(targetHref);
+    const lockTarget = (targetKey) => {
+      lockedKey = targetKey;
+      setActiveKey(targetKey);
       if (lockTimer) clearTimeout(lockTimer);
       lockTimer = setTimeout(() => {
-        lockedHref = null;
+        lockedKey = null;
         lockTimer = null;
         syncFromScroll();
       }, 950);
@@ -441,8 +451,8 @@
     };
 
     const cancelLockOnManualInput = () => {
-      if (!lockedHref) return;
-      lockedHref = null;
+      if (!lockedKey) return;
+      lockedKey = null;
       if (lockTimer) {
         clearTimeout(lockTimer);
         lockTimer = null;
@@ -463,7 +473,7 @@
       if (trackedHashes.includes(hash)) {
         lockTarget(hash);
       } else if (!hash) {
-        lockTarget('./index.html');
+        lockTarget('home');
       }
     });
 
@@ -479,6 +489,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    initCleanRoutes();
     initHeaderAndLang();
     initSectionNavSync();
     initPureSkyToggle();
