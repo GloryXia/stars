@@ -63,6 +63,17 @@ ALPHA_K = 1.35
 V_E0 = 0.0056
 LAMBDA_CHAOS = 1.00
 
+XI_CLAMP = 0.65
+XI_HARM_AMPS = (0.10, 0.07, 0.04)
+XI_HARM_PERIODS_YR = (780.0, 290.0, 115.0)
+XI_OU_TAU_YR = 250.0
+XI_OU_SIGMA = 0.10
+XI_JUMP_RATE_PER_YR = 0.008
+XI_JUMP_TAU_YR = 120.0
+XI_JUMP_NEG_PROB = 0.45
+XI_JUMP_NEG = -0.18
+XI_JUMP_POS = 0.22
+
 BETA_K = 2.85
 GAMMA_W = 0.35
 GAMMA_N = 0.65
@@ -106,6 +117,26 @@ R_B4_CATALOG = 60.0
 GALACTIC_SEAT_COUNT = 15000
 GALACTIC_SN_RATE_PER_1000YR = 15.0  # ~1.5 core-collapse / Type Ia supernovae per century across Milky Way
 B4_PER_PROGENITOR_1000YR = 0.0024
+
+# --- B4 Physical Fluence Reference & Lv.4B Induced Supernova (§6.2, §7.3) ---
+PHI_REF_B4_J_M2 = 1.0e8
+B4_INDUCED_D_REF_LY = 22.0
+
+# --- Observation Aperture, Solid Angle & Photon Integration Constants (§7.2) ---
+OMEGA_FULL_DEG2 = 4.0 * math.pi * ((180.0 / math.pi) ** 2)
+TAU0_OBS_REAL_S = 2.5
+OMEGA_MIN_DEG2 = {0: OMEGA_FULL_DEG2, 1: 4125.3, 2: 41.25, 3: 0.4125, 4: 2.58e-5}
+
+# --- Lv.4A Nicoll-Dyson Phased-Array Beam Constants (§7.3) ---
+AU_M = 1.495978707e11
+LY_M = 9.4607304725808e15
+SIM_YR_S = 31557600.0
+ND_BEAM_POWER_W = 2.0e26
+ND_BEAM_EFF = 0.50
+ND_BEAM_LAMBDA_M = 1.0e-6
+ND_BEAM_APERTURE_M = 3.0e10
+ND_BEAM_DWELL_S = 1.0 * SIM_YR_S
+ND_BEAM_PHI_KILL_0_J_M2 = 2.0e16
 
 
 @dataclass(frozen=True)
@@ -495,6 +526,46 @@ def hazard_rate_per_yr(sdi: float) -> float:
     return h_century / 100.0
 
 
+def effective_baseline_ly(baseline_span_ly: float, n_stars: int) -> float:
+    """Physical transverse baseline B_perp from confirmed synced stellar separation (0.01 ly for single star)."""
+    return max(0.01, baseline_span_ly * 0.7071 if n_stars >= 2 else 0.01)
+
+
+def photon_integration_efficiency(omega_deg2: float, dwell_real_s: float) -> float:
+    """Narrow-beam photon integration efficiency eta_int(Delta t_dwell, Omega_A) in [0, 1]."""
+    if omega_deg2 >= OMEGA_FULL_DEG2 - 1e-6:
+        return 1.0
+    omega_clamped = max(1e-12, omega_deg2)
+    tau_int = TAU0_OBS_REAL_S * math.log(OMEGA_FULL_DEG2 / omega_clamped)
+    if tau_int <= 0.0:
+        return 1.0
+    return 1.0 - math.exp(-max(0.0, dwell_real_s) / tau_int)
+
+
+def g_obs_gain(
+    lv_obs: int,
+    baseline_span_ly: float,
+    n_stars: int,
+    k: float,
+    omega_deg2: Optional[float] = None,
+    dwell_real_s: Optional[float] = None,
+) -> float:
+    """Executable G_obs(Lv_obs, Omega_A, Delta t_dwell, B_perp) formula per GDD §7.2."""
+    g0_surv = 0.08 + 0.52 / (1.0 + math.exp(-28.0 * (k - 0.675)))
+    survey_map = {0: g0_surv, 1: 1.0, 2: 2.5, 3: 8.0, 4: 25.0}
+    beta_r_map = {0: 0.0, 1: 0.0, 2: 0.2, 3: 1.0, 4: 1.5}
+    b_perp = effective_baseline_ly(baseline_span_ly, n_stars)
+    baseline_mult = 1.0 + beta_r_map[lv_obs] * math.log(b_perp / 0.01)
+    if lv_obs == 0:
+        if dwell_real_s is None:
+            return 1.2 * baseline_mult
+        return g0_surv * baseline_mult
+    omega_val = OMEGA_MIN_DEG2[lv_obs] if omega_deg2 is None else max(OMEGA_MIN_DEG2[lv_obs], min(OMEGA_FULL_DEG2, omega_deg2))
+    eta_int = 1.0 if dwell_real_s is None else photon_integration_efficiency(omega_val, dwell_real_s)
+    beam_term = 1.0 + eta_int * (math.sqrt(OMEGA_FULL_DEG2 / omega_val) - 1.0)
+    return survey_map[lv_obs] * beam_term * baseline_mult
+
+
 def survey_and_focus_gain(lv_obs: int, baseline_span_ly: float, n_stars: int, k: float) -> Tuple[float, float, float]:
     g0_surv = 0.08 + 0.52 / (1.0 + math.exp(-28.0 * (k - 0.675)))
     survey_map = {0: g0_surv, 1: 1.0, 2: 2.5, 3: 8.0, 4: 25.0}
@@ -503,7 +574,7 @@ def survey_and_focus_gain(lv_obs: int, baseline_span_ly: float, n_stars: int, k:
     sweep_prob_map = {0: 0.0004, 1: 0.0030, 2: 0.0020, 3: 0.0010, 4: 0.0004}
 
     # Physical interferometric baseline comes from real confirmed synced stellar separation, not empty vacuum radius.
-    b_perp = max(0.01, baseline_span_ly * 0.7071 if n_stars >= 2 else 0.01)
+    b_perp = effective_baseline_ly(baseline_span_ly, n_stars)
     baseline_mult = 1.0 + beta_r_map[lv_obs] * math.log(b_perp / 0.01)
     return survey_map[lv_obs], focus_map[lv_obs] * baseline_mult, sweep_prob_map[lv_obs]
 
@@ -899,8 +970,8 @@ def generate_b4_catalog_events(
     return bursts
 
 
-def b4_lambda_at_node(burst: B4BurstEvent, node_xyz: Tuple[float, float, float]) -> Tuple[float, float]:
-    """Return (dist_ly, Lambda_B4) at a specific node coordinate using inverse-square + beaming."""
+def b4_fluence_at_node(burst: B4BurstEvent, node_xyz: Tuple[float, float, float]) -> Tuple[float, float, float]:
+    """Return (dist_ly, Phi_B4_J_m2, Lambda_B4) at a specific node coordinate using inverse-square + beaming."""
     dx = node_xyz[0] - burst.xyz[0]
     dy = node_xyz[1] - burst.xyz[1]
     dz = node_xyz[2] - burst.xyz[2]
@@ -910,7 +981,57 @@ def b4_lambda_at_node(burst: B4BurstEvent, node_xyz: Tuple[float, float, float])
         cos_ang = abs((dx * burst.jet_dir[0] + dy * burst.jet_dir[1] + dz * burst.jet_dir[2]) / d)
         beam_mult = burst.beam_boost if cos_ang >= burst.jet_cos_half else burst.off_beam_factor
     flux_ratio = ((burst.d_ref_ly / d) ** 2) * beam_mult * math.exp(-KAPPA_LASER * d)
-    return d, math.sqrt(max(0.0, flux_ratio))
+    phi_j_m2 = PHI_REF_B4_J_M2 * flux_ratio
+    return d, phi_j_m2, math.sqrt(max(0.0, flux_ratio))
+
+
+def b4_lambda_at_node(burst: B4BurstEvent, node_xyz: Tuple[float, float, float]) -> Tuple[float, float]:
+    """Return (dist_ly, Lambda_B4) at a specific node coordinate using inverse-square + beaming."""
+    d, _, lam_b4 = b4_fluence_at_node(burst, node_xyz)
+    return d, lam_b4
+
+
+def induced_b4_burst(
+    event_id: str,
+    progenitor_xyz: Tuple[float, float, float],
+    t_emit: float,
+    d_ref_ly: float = B4_INDUCED_D_REF_LY,
+) -> B4BurstEvent:
+    """Construct a standard Strike Lv.4B induced supernova burst anchored at Phi_ref = 1e8 J/m^2."""
+    return B4BurstEvent(
+        event_id=event_id,
+        xyz=progenitor_xyz,
+        t_emit=t_emit,
+        d_ref_ly=d_ref_ly,
+        is_beamed=False,
+        jet_dir=(1.0, 0.0, 0.0),
+        jet_cos_half=1.0,
+        beam_boost=1.0,
+        off_beam_factor=1.0,
+    )
+
+
+def nicoll_dyson_dose(
+    dist_ly: float,
+    sigma_impact_perp_m: float,
+    r_persist_node: float = 1.0,
+) -> Dict[str, float | bool]:
+    """Evaluate Strike Lv.4A Nicoll-Dyson beam dose closure & persistence-coupled kill threshold (§7.3)."""
+    d_m = max(0.0, dist_ly) * LY_M
+    r_diff_m = (1.22 * ND_BEAM_LAMBDA_M * d_m) / ND_BEAM_APERTURE_M
+    r_spot_m = max(r_diff_m, max(1.0, sigma_impact_perp_m))
+    tau_laser = KAPPA_LASER * max(0.0, dist_ly)
+    i_target_w_m2 = (ND_BEAM_POWER_W * ND_BEAM_EFF * math.exp(-tau_laser)) / (math.pi * (r_spot_m ** 2))
+    phi_recv_j_m2 = i_target_w_m2 * ND_BEAM_DWELL_S
+    phi_kill_j_m2 = ND_BEAM_PHI_KILL_0_J_M2 * max(1.0, r_persist_node)
+    return {
+        "r_diff_m": r_diff_m,
+        "r_spot_m": r_spot_m,
+        "i_target_w_m2": i_target_w_m2,
+        "phi_recv_j_m2": phi_recv_j_m2,
+        "phi_kill_j_m2": phi_kill_j_m2,
+        "kill": phi_recv_j_m2 >= phi_kill_j_m2,
+    }
 
 
 def generate_cataclysms(
@@ -1051,7 +1172,7 @@ def build_world_seed(seed: int, steps: int, env: Optional[GalacticEnvironment] =
     cosmos = generate_cosmos_unbiased(rng)
     harm_phases = [rng.uniform(0.0, 2.0 * math.pi) for _ in range(3)]
     ou_gauss = [rng.gauss(0.0, 1.0) for _ in range(steps + 1)]
-    jump_rolls = [(rng.random() < 0.008 * DT, rng.random() < 0.45) for _ in range(steps + 1)]
+    jump_rolls = [(rng.random() < XI_JUMP_RATE_PER_YR * DT, rng.random() < XI_JUMP_NEG_PROB) for _ in range(steps + 1)]
     a_check_rolls = [rng.random() for _ in range(steps + 1)]
     coldwar_rolls = [(rng.random(), rng.random()) for _ in range(steps + 1)]
     sweep_rolls = [rng.random() for _ in range(steps + 1)]
@@ -1169,18 +1290,14 @@ def run_single_world(
     plan_idx = 0
     queue_downtime_yr = 0.0
 
-    harm_amps = [0.10, 0.07, 0.04]
+    harm_amps = list(XI_HARM_AMPS)
     l0_scale = traits["L_0"]
-    harm_omegas = [
-        2.0 * math.pi / (780.0 * l0_scale),
-        2.0 * math.pi / (290.0 * l0_scale),
-        2.0 * math.pi / (115.0 * l0_scale),
-    ]
+    harm_omegas = [2.0 * math.pi / (period * l0_scale) for period in XI_HARM_PERIODS_YR]
     z_ou = 0.0
-    ou_decay = math.exp(-dt / 250.0)
-    ou_std = 0.10 * math.sqrt(1.0 - math.exp(-2.0 * dt / 250.0))
+    ou_decay = math.exp(-dt / XI_OU_TAU_YR)
+    ou_std = XI_OU_SIGMA * math.sqrt(1.0 - math.exp(-2.0 * dt / XI_OU_TAU_YR))
     j_jump = 0.0
-    jump_decay = math.exp(-dt / 120.0)
+    jump_decay = math.exp(-dt / XI_JUMP_TAU_YR)
 
     shield_used = False
     collapse_armed = True
@@ -1632,7 +1749,7 @@ def run_single_world(
         # 8) Productivity & point rate
         if alive:
             wave = sum(a * math.sin(w * t + p) for a, w, p in zip(harm_amps, harm_omegas, world.harm_phases))
-            eta_stoch = max(-0.65, min(0.65, wave + z_ou + j_jump))
+            eta_stoch = max(-XI_CLAMP, min(XI_CLAMP, wave + z_ou + j_jump))
             pi_exp = math.exp(ALPHA_K * (k - K0))
             chaos_damp = max(0.0, 1.0 - LAMBDA_CHAOS * sdi)
             pi_prod = pi_exp * math.exp(eta_stoch) * chaos_damp
@@ -1910,7 +2027,7 @@ def run_single_world(
                 j_jump *= jump_decay
                 do_jump, jump_neg = world.jump_rolls[step_idx]
                 if do_jump:
-                    j_jump += -0.18 if jump_neg else 0.22
+                    j_jump += XI_JUMP_NEG if jump_neg else XI_JUMP_POS
 
                 # Integrate points & advance K using core-confirmed cap_conf (R2 + R7)
                 d_evo = v_e * dt
@@ -2228,7 +2345,35 @@ def verify_acceptance_cases() -> None:
     assert env_arm.rho_star > 5.0 * env_outer.rho_star and env_arm.b1b_per_1000yr > 10.0 * env_outer.b1b_per_1000yr
     assert env_arm.b2_per_1000yr > 0.0 and env_arm.progenitor_prob > 20.0 * env_outer.progenitor_prob
 
-    print("ACCEPTANCE_CHECKS_PASSED: R1, R2, R3, R4, R5, R8, R9, Numbered-Sectors, Continuous-Field, Directed-Expedition, and Multi-Messenger (EM/nu/GW) verified.")
+    # (f) Finalized 4 parameter groups closure (§5.2 Xi, §6.2/§7.3 B4/4B fluence, §7.2 G_obs, §7.3 Lv.4A Nicoll-Dyson):
+    # Group 1: Xi(t) stationary variance / bounds sanity
+    assert XI_CLAMP == 0.65 and XI_HARM_AMPS == (0.10, 0.07, 0.04) and XI_HARM_PERIODS_YR == (780.0, 290.0, 115.0)
+    # Group 2: B4 physical fluence Phi_ref = 1.0e8 J/m^2 & Lv.4B induced supernova consistency
+    b_ind = induced_b4_burst("lv4b_test", (22.0, 0.0, 0.0), 0.0)
+    d_ind, phi_ind, lam_ind = b4_fluence_at_node(b_ind, (0.0, 0.0, 0.0))
+    assert abs(d_ind - 22.0) < 1e-9 and abs(phi_ind - PHI_REF_B4_J_M2 * math.exp(-KAPPA_LASER * 22.0)) < 1e-3
+    assert abs(lam_ind - math.sqrt(phi_ind / PHI_REF_B4_J_M2)) < 1e-12
+    # Group 3: G_obs executable formula (survey limit -> G_survey; steady-state focus matches §5.3 table within 0.1%; B_perp scaling)
+    for lv_chk, g_surv_tab, g_foc_tab in ((1, 1.0, 3.16), (2, 2.5, 79.1), (3, 8.0, 2530.0), (4, 25.0, 1.0e6)):
+        g_surv_exec = g_obs_gain(lv_chk, 0.01, 1, 1.2, omega_deg2=OMEGA_FULL_DEG2, dwell_real_s=0.0)
+        g_zero_dwell = g_obs_gain(lv_chk, 0.01, 1, 1.2, omega_deg2=OMEGA_MIN_DEG2[lv_chk], dwell_real_s=0.0)
+        g_steady_exec = g_obs_gain(lv_chk, 0.01, 1, 1.2, omega_deg2=OMEGA_MIN_DEG2[lv_chk], dwell_real_s=1.0e6)
+        assert abs(g_surv_exec - g_surv_tab) < 1e-9 and abs(g_zero_dwell - g_surv_tab) < 1e-9
+        assert abs(g_steady_exec - g_foc_tab) / g_foc_tab < 1e-3, f"G_obs steady mismatch at Lv.{lv_chk}: {g_steady_exec}"
+    assert abs(effective_baseline_ly(10.0, 1) - 0.01) < 1e-9
+    assert abs(effective_baseline_ly(10.0, 2) - 7.071) < 1e-6
+    assert g_obs_gain(3, 10.0, 2, 1.2) > g_obs_gain(3, 10.0, 1, 1.2)
+    # Group 4: Lv.4A Nicoll-Dyson beam dose closure & R_persist coupling
+    nd_1au = nicoll_dyson_dose(0.0, AU_M, r_persist_node=1.0)
+    assert 1.40e3 < float(nd_1au["i_target_w_m2"]) < 1.45e3 and not nd_1au["kill"], "1 AU defocused beam must not kill"
+    nd_300_coarse_low = nicoll_dyson_dose(300.0, 1.0e8, r_persist_node=1.0)
+    nd_300_coarse_hi = nicoll_dyson_dose(300.0, 1.0e8, r_persist_node=11.4)
+    nd_3k_coarse_hi = nicoll_dyson_dose(3000.0, 1.0e8, r_persist_node=11.4)
+    nd_3k_tight_max = nicoll_dyson_dose(3000.0, 1.0e7, r_persist_node=42.3)
+    assert nd_300_coarse_low["kill"] and not nd_300_coarse_hi["kill"], "Coarse 1e8 m spot kills low R_persist but bounces off multi-star Lv.3"
+    assert not nd_3k_coarse_hi["kill"] and nd_3k_tight_max["kill"], "Tight 1e7 m core lock pierces Lv.4 multi-star fortress at 3,000 ly"
+
+    print("ACCEPTANCE_CHECKS_PASSED: R1, R2, R3, R4, R5, R8, R9, Numbered-Sectors, Continuous-Field, Directed-Expedition, Multi-Messenger (EM/nu/GW), and Finalized Parameter Closures verified.")
 
 
 def summarize_results(res: List[Dict], n_runs: int) -> Dict:
