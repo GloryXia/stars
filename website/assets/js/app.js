@@ -357,8 +357,130 @@
     });
   }
 
+  function initSectionNavSync() {
+    const sections = [
+      { hash: '#cosmos', el: document.getElementById('cosmos') },
+      { hash: '#features', el: document.getElementById('features') }
+    ].filter((item) => Boolean(item.el));
+
+    if (!sections.length) return;
+
+    const trackedHashes = sections.map((item) => item.hash);
+    const navLinks = Array.from(
+      document.querySelectorAll('.nav-links a.nav-link, .mobile-drawer-nav a.nav-link')
+    ).filter((link) => {
+      const href = link.getAttribute('href');
+      return href === './index.html' || trackedHashes.includes(href);
+    });
+
+    if (!navLinks.length) return;
+
+    let activeHref = '';
+    let lockedHref = null;
+    let lockTimer = null;
+    let rafPending = false;
+
+    const setActiveHref = (targetHref) => {
+      if (activeHref === targetHref) return;
+      activeHref = targetHref;
+      navLinks.forEach((link) => {
+        if (link.getAttribute('href') === targetHref) {
+          link.setAttribute('aria-current', 'page');
+        } else {
+          link.removeAttribute('aria-current');
+        }
+      });
+    };
+
+    const resolveScrollHref = () => {
+      const header = document.querySelector('.site-header');
+      const headerHeight = header ? header.offsetHeight : 68;
+      const triggerY = headerHeight + Math.min(180, window.innerHeight * 0.24);
+      const scrollBottom = window.scrollY + window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+
+      if (scrollBottom >= docHeight - 36) {
+        const lastSection = sections[sections.length - 1];
+        if (lastSection.el.getBoundingClientRect().top < window.innerHeight * 0.85) {
+          return lastSection.hash;
+        }
+      }
+
+      let resolved = './index.html';
+      for (const section of sections) {
+        if (section.el.getBoundingClientRect().top <= triggerY) {
+          resolved = section.hash;
+        }
+      }
+      return resolved;
+    };
+
+    const syncFromScroll = () => {
+      if (lockedHref) return;
+      setActiveHref(resolveScrollHref());
+    };
+
+    const lockTarget = (targetHref) => {
+      lockedHref = targetHref;
+      setActiveHref(targetHref);
+      if (lockTimer) clearTimeout(lockTimer);
+      lockTimer = setTimeout(() => {
+        lockedHref = null;
+        lockTimer = null;
+        syncFromScroll();
+      }, 950);
+    };
+
+    const scheduleScrollSync = () => {
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(() => {
+        rafPending = false;
+        syncFromScroll();
+      });
+    };
+
+    const cancelLockOnManualInput = () => {
+      if (!lockedHref) return;
+      lockedHref = null;
+      if (lockTimer) {
+        clearTimeout(lockTimer);
+        lockTimer = null;
+      }
+      scheduleScrollSync();
+    };
+
+    document.querySelectorAll('a[href^="#"]').forEach((link) => {
+      const href = link.getAttribute('href');
+      if (!trackedHashes.includes(href)) return;
+      link.addEventListener('click', () => {
+        lockTarget(href);
+      });
+    });
+
+    window.addEventListener('hashchange', () => {
+      const hash = window.location.hash;
+      if (trackedHashes.includes(hash)) {
+        lockTarget(hash);
+      } else if (!hash) {
+        lockTarget('./index.html');
+      }
+    });
+
+    window.addEventListener('scroll', scheduleScrollSync, { passive: true });
+    window.addEventListener('wheel', cancelLockOnManualInput, { passive: true });
+    window.addEventListener('touchmove', cancelLockOnManualInput, { passive: true });
+
+    if (trackedHashes.includes(window.location.hash)) {
+      lockTarget(window.location.hash);
+    } else {
+      syncFromScroll();
+    }
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     initHeaderAndLang();
+    initSectionNavSync();
     initPureSkyToggle();
     initGrammarExplorer();
     initRelayToggles();

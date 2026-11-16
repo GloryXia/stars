@@ -162,6 +162,11 @@ ul, ol {
   padding-block: 68px;
   border-top: 1px solid var(--rule);
   position: relative;
+  scroll-margin-top: 68px;
+}
+
+section[id] {
+  scroll-margin-top: 68px;
 }
 
 .section-header {
@@ -401,13 +406,15 @@ html[lang="en"] .brand-title {
 }
 
 .nav-link:hover,
-.nav-link[aria-current="page"] {
+.nav-link[aria-current="page"],
+.nav-link[aria-current="location"] {
   color: var(--ink1);
   background: var(--void1);
   border-color: var(--rule);
 }
 
-.nav-link[aria-current="page"] {
+.nav-link[aria-current="page"],
+.nav-link[aria-current="location"] {
   border-color: var(--selfDim);
   color: var(--self);
 }
