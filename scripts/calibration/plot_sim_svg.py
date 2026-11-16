@@ -1,148 +1,169 @@
-"""Generate a crisp 4-panel dark-room astronomical chart SVG from sim_results.json."""
+#!/usr/bin/env python3
+"""
+Generate dark-mode 6-panel calibration SVG from sim_results.json (GDD v0.15.0).
+Includes survival, scale trajectory K(t), non-linear point speed v_E(t),
+cumulative evolution points E_cum(t), systemic fragility SDI(t), and neighbor lock rate.
+"""
+from __future__ import annotations
 
 import json
-from pathlib import Path
+import os
 
-ROOT = Path(__file__).resolve().parent
-data = json.loads((ROOT / "sim_results.json").read_text(encoding="utf-8"))
-summary = data["summary"]
-curves = data["ensemble_curves"]
+HERE = os.path.dirname(os.path.abspath(__file__))
+IN_JSON = os.path.join(HERE, "sim_results.json")
+OUT_SVG = os.path.join(HERE, "sim_curves.svg")
 
-STYLES = {
-    "balanced": {"label": "① 稳健均衡（先存续扩星后冲观测）", "color": "#6FE3FF", "dash": ""},
-    "obs_rusher": {"label": "② 冷战赌徒（裸奔狂点接收能力）", "color": "#FF8A3D", "dash": "6 3"},
-    "hermit": {"label": "③ 单星隐士（N=1微球低噪龟缩）", "color": "#A98BFF", "dash": "2 3"},
-    "expander": {"label": "④ 激进扩泡（疆域快于组织同步）", "color": "#FF4FA3", "dash": "9 3 2 3"},
-}
-
-W, H = 1120, 820
-
-
-def map_x(t: float, x0: float, pw: float) -> float:
-    return x0 + (t / 5000.0) * pw
-
-
-def map_y(val: float, vmin: float, vmax: float, y0: float, ph: float) -> float:
-    frac = (val - vmin) / (vmax - vmin)
-    return y0 + ph - max(0.0, min(1.0, frac)) * ph
-
-
-def polyline_pts(strat: str, key: str, vmin: float, vmax: float, x0: float, y0: float, pw: float, ph: float) -> str:
-    pts = []
-    for row in curves[strat]:
-        v = row[key]
-        if v is None:
-            break
-        pts.append(f"{map_x(row['t'], x0, pw):.1f},{map_y(v, vmin, vmax, y0, ph):.1f}")
-    return " ".join(pts)
-
-
-svg: list[str] = [
-    f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="PingFang SC, Noto Sans SC, sans-serif">',
-    '<style>',
-    '  .title { fill:#E6EEF7; font-size:17px; font-weight:600; letter-spacing:0.6px; }',
-    '  .sub { fill:#9AA9BA; font-size:11.5px; }',
-    '  .ptitle { fill:#E6EEF7; font-size:13.5px; font-weight:600; }',
-    '  .ax { fill:#5C6B7D; font-size:10px; font-family:JetBrains Mono, Menlo, monospace; }',
-    '  .lab { fill:#9AA9BA; font-size:10.5px; }',
-    '  .grid { stroke:#1A2434; stroke-width:1; }',
-    '  .axis { stroke:#2C3E55; stroke-width:1.2; }',
-    '</style>',
-    f'<rect width="{W}" height="{H}" fill="#05070B"/>',
-    '<text x="36" y="34" class="title">真·大沉默宇宙（v3 校准 · 5,000 模拟年 · N=4,000 次蒙特卡洛）四策略演化相图</text>',
-    '<text x="36" y="54" class="sub">参数口径：bar_d_civ = 600 ly · K(0)=0.73 · R_sync0 = 1.40 ly · 冷战连续危险率 λ(SDI) + 恐龙级撞击 B1b / 超新星 B4 外部过滤器</text>',
+STRATEGIES = [
+    ("balanced", "Balanced", "#4CF2A0", "none"),
+    ("obs_rusher", "Obs-Rusher (Sensor Blitz)", "#C084FC", "6,3"),
+    ("system_hermit", "System Hermit (No Interstellar)", "#38BDF8", "none"),
+    ("expander", "Blind Expander (No Def/Gov)", "#F59E0B", "none"),
+    ("planet_hermit", "Planet Hermit (No Off-World)", "#F43F5E", "none"),
 ]
 
-# Legend row
-lx = 36
-for strat, st in STYLES.items():
-    svg.append(f'<line x1="{lx}" y1="74" x2="{lx+26}" y2="74" stroke="{st["color"]}" stroke-width="2.2" stroke-dasharray="{st["dash"]}"/>')
-    svg.append(f'<text x="{lx+34}" y="78" fill="#E6EEF7" font-size="11">{st["label"]}</text>')
-    lx += 265
+W, H = 1140, 1210
 
 
-def draw_panel_box(x0: float, y0: float, pw: float, ph: float, title: str, yticks: list[tuple[float, str]], vmin: float, vmax: float, xunit: bool = True):
-    svg.append(f'<rect x="{x0}" y="{y0}" width="{pw}" height="{ph}" rx="6" fill="#080C12" stroke="#1E2B3D"/>')
-    svg.append(f'<text x="{x0}" y="{y0-10}" class="ptitle">{title}</text>')
-    # Y grid
-    for yv, ylab in yticks:
-        yy = map_y(yv, vmin, vmax, y0, ph)
-        svg.append(f'<line x1="{x0}" y1="{yy:.1f}" x2="{x0+pw}" y2="{yy:.1f}" class="grid"/>')
-        svg.append(f'<text x="{x0-8}" y="{yy+3.5:.1f}" text-anchor="end" class="ax">{ylab}</text>')
-    # X grid
-    for tx in [0, 1000, 2000, 3000, 4000, 5000]:
-        xx = map_x(tx, x0, pw)
-        svg.append(f'<line x1="{xx:.1f}" y1="{y0}" x2="{xx:.1f}" y2="{y0+ph}" class="grid"/>')
-        if xunit:
-            svg.append(f'<text x="{xx:.1f}" y="{y0+ph+15}" text-anchor="middle" class="ax">{tx}y</text>')
+def lerp_x(t: float, px: float, pw: float) -> float:
+    return px + (t / 5000.0) * pw
 
 
-# Panel 1: Survival Curve S(t)
-p1x, p1y, pw, ph = 70, 120, 460, 235
-draw_panel_box(p1x, p1y, pw, ph, "① 文明存活曲线 S(t)：多星冗余破局 vs 内外双过滤器", [(0, "0%"), (0.25, "25%"), (0.5, "50%"), (0.75, "75%"), (1.0, "100%")], 0.0, 1.0)
-for strat, st in STYLES.items():
-    pts = polyline_pts(strat, "surv_pct", 0.0, 1.0, p1x, p1y, pw, ph)
-    svg.append(f'<polyline fill="none" stroke="{st["color"]}" stroke-width="2.2" stroke-dasharray="{st["dash"]}" points="{pts}"/>')
-b_surv = summary["balanced"]["survival_5000yr"] * 100
-r_surv = summary["obs_rusher"]["survival_5000yr"] * 100
-h_surv = summary["hermit"]["survival_5000yr"] * 100
-e_surv = summary["expander"]["survival_5000yr"] * 100
-svg.append(f'<text x="{p1x+pw-8}" y="{map_y(summary["balanced"]["survival_5000yr"],0,1,p1y,ph)-8:.1f}" text-anchor="end" fill="#6FE3FF" font-size="10.5">{b_surv:.1f}% 跨过幼年期稳健永续</text>')
-svg.append(f'<text x="{p1x+pw-8}" y="{map_y(summary["obs_rusher"]["survival_5000yr"],0,1,p1y,ph)-8:.1f}" text-anchor="end" fill="#FF8A3D" font-size="10">冷战赌徒 {r_surv:.1f}% 险胜转正</text>')
-svg.append(f'<text x="{p1x+pw-8}" y="{map_y(0.08,0,1,p1y,ph)-30:.1f}" text-anchor="end" fill="#A98BFF" font-size="10">激进扩泡 {e_surv:.1f}% / 单星隐士 {h_surv:.1f}%</text>')
+def lerp_y(val: float, ymin: float, ymax: float, py: float, ph: float) -> float:
+    clamped = max(ymin, min(ymax, val))
+    return py + ph - ((clamped - ymin) / (ymax - ymin)) * ph
 
-# Panel 2: Mean K(t) among survivors
-p2x, p2y = 615, 120
-draw_panel_box(p2x, p2y, pw, ph, "② 在世者卡尔达肖夫能级 K(t)：单星天花板 vs 多星突破", [(0.73, "0.73"), (1.05, "1.05"), (1.40, "1.40"), (1.80, "1.80")], 0.70, 1.85)
-y_cap1 = map_y(1.05, 0.70, 1.85, p2y, ph)
-svg.append(f'<line x1="{p2x}" y1="{y_cap1:.1f}" x2="{p2x+pw}" y2="{y_cap1:.1f}" stroke="#5C6B7D" stroke-dasharray="4 3"/>')
-svg.append(f'<text x="{p2x+pw-8}" y="{y_cap1-5:.1f}" text-anchor="end" fill="#9AA9BA" font-size="9.5">单星物理天花板 K₁ = 1.05</text>')
-for strat, st in STYLES.items():
-    pts = polyline_pts(strat, "mean_k", 0.70, 1.85, p2x, p2y, pw, ph)
-    svg.append(f'<polyline fill="none" stroke="{st["color"]}" stroke-width="2.2" stroke-dasharray="{st["dash"]}" points="{pts}"/>')
-svg.append(f'<text x="{p2x+pw-8}" y="{map_y(1.66,0.70,1.85,p2y,ph)+14:.1f}" text-anchor="end" fill="#6FE3FF" font-size="10">Tier 3 多星网络稳态演化</text>')
 
-# Panel 3: Mean SDI(t) among survivors + Cold War zone
-p3x, p3y = 70, 425
-y_cw_top = map_y(0.85, 0.0, 1.0, p3y, ph)
-y_cw_bot = map_y(0.55, 0.0, 1.0, p3y, ph)
-svg.append(f'<rect x="{p3x}" y="{y_cw_top:.1f}" width="{pw}" height="{y_cw_bot-y_cw_top:.1f}" fill="#FF3B47" fill-opacity="0.08"/>')
-draw_panel_box(p3x, p3y, pw, ph, "③ 在世者系统脆弱度 SDI(t)：稳态动态张力 vs 55–85% 冷战走钢丝带", [(0, "0%"), (0.38, "38%"), (0.55, "55%"), (0.85, "85%"), (1.0, "100%")], 0.0, 1.0)
-svg.append(f'<rect x="{p3x}" y="{y_cw_top:.1f}" width="{pw}" height="{y_cw_bot-y_cw_top:.1f}" fill="#FF3B47" fill-opacity="0.07"/>')
-y_safe = map_y(0.38, 0.0, 1.0, p3y, ph)
-svg.append(f'<line x1="{p3x}" y1="{y_safe:.1f}" x2="{p3x+pw}" y2="{y_safe:.1f}" stroke="#4CF2A0" stroke-opacity="0.45" stroke-dasharray="4 3"/>')
-svg.append(f'<text x="{p3x+pw-8}" y="{y_cw_top+13:.1f}" text-anchor="end" fill="#FF8A3D" font-size="9.5">冷战边缘危险带 (55%–85% · 概率自毁爬升)</text>')
-svg.append(f'<text x="{p3x+pw-8}" y="{y_safe+12:.1f}" text-anchor="end" fill="#4CF2A0" font-size="9.5">安全线 38% 以下（后期稳态保留 ~18% 张力）</text>')
-for strat, st in STYLES.items():
-    pts = polyline_pts(strat, "mean_sdi", 0.0, 1.0, p3x, p3y, pw, ph)
-    svg.append(f'<polyline fill="none" stroke="{st["color"]}" stroke-width="2.2" stroke-dasharray="{st["dash"]}" points="{pts}"/>')
+def main() -> None:
+    with open(IN_JSON, "r", encoding="utf-8") as f:
+        data = json.load(f)
 
-# Panel 4: Cumulative discovery curve scaled cleanly to 0..40%
-p4x, p4y = 615, 425
-draw_panel_box(p4x, p4y, pw, ph, "④ 累计发现他者比例 D(t)：真·大沉默下的“世纪大新闻”稀缺度", [(0, "0%"), (0.10, "10%"), (0.20, "20%"), (0.30, "30%"), (0.40, "40%")], 0.0, 0.40)
-for strat, st in STYLES.items():
-    pts = polyline_pts(strat, "lock_pct", 0.0, 0.40, p4x, p4y, pw, ph)
-    svg.append(f'<polyline fill="none" stroke="{st["color"]}" stroke-width="2.2" stroke-dasharray="{st["dash"]}" points="{pts}"/>')
-b_lock = summary["balanced"]["lock_detect_rate"] * 100
-svg.append(f'<text x="{p4x+pw-8}" y="{map_y(summary["balanced"]["lock_detect_rate"],0,0.40,p4y,ph)-8:.1f}" text-anchor="end" fill="#6FE3FF" font-size="10.5">{b_lock:.1f}% 终生发现他者（约 70% 终身未见邻居）</text>')
+    curves = data["ensemble_curves"]
+    summary = data["summary"]
+    fit = data["human_curve_fit"]
 
-# Bottom summary banner dynamically driven by sim_results.json
-bx, by = 70, 695
-svg.append(f'<rect x="{bx}" y="{by}" width="1005" height="104" rx="8" fill="#05070B" fill-opacity="0.92" stroke="#24344A"/>')
-svg.append(f'<text x="{bx+16}" y="{by+24}" fill="#E6EEF7" font-size="12" font-weight="600">关键生态涌现统计（v3 真·大沉默校准：每组 1,000 次蒙特卡洛演化，跨度 5,000 模拟年）</text>')
-hb_b4 = (summary["hermit"]["causes"].get("B1b_DinosaurKiller_Impact", 0) + summary["hermit"]["causes"].get("B4_Supernova", 0)) / 10.0
-ecw = summary["expander"]["causes"].get("ColdWar_SelfDestruct", 0) / 10.0
-rows = [
-    (bx + 20, by + 54, "#6FE3FF", f"稳健流: 5000年存活 {b_surv:.1f}%, 锁定 {b_lock:.1f}% (中位 {summary['balanced']['median_t_lock_yr']:.0f} yr), 冷战自毁仅 {summary['balanced']['causes'].get('ColdWar_SelfDestruct',0)/10:.1f}%"),
-    (bx + 520, by + 54, "#FF8A3D", f"赌徒流: 存活 {r_surv:.1f}%, 均经历 {summary['obs_rusher']['mean_near_miss_crises']:.2f} 次危机, 盲亡者 {summary['obs_rusher']['callback_among_blind_dead']*100:.1f}% 触发亡灵 Callback"),
-    (bx + 20, by + 82, "#A98BFF", f"单星隐士: 存活 {h_surv:.1f}%, 0 自毁但 {hb_b4:.1f}% 死于 B1b 恐龙撞击 / B4 超新星"),
-    (bx + 520, by + 82, "#FF4FA3", f"激进扩泡: 存活 {e_surv:.1f}%, 均经历 {summary['expander']['mean_near_miss_crises']:.2f} 次危机, {ecw:.1f}% 死于冷战同步分裂"),
-]
-for rx, ry, c, txt in rows:
-    svg.append(f'<circle cx="{rx}" cy="{ry-3.5}" r="3.5" fill="{c}"/>')
-    svg.append(f'<text x="{rx+11}" y="{ry}" fill="#C7D3E3" font-size="11">{txt}</text>')
+    svg: list[str] = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}">',
+        '<defs>',
+        '<style>',
+        '  text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", sans-serif; }',
+        '  .title { fill: #F8FAFC; font-size: 19px; font-weight: 700; }',
+        '  .subtitle { fill: #94A3B8; font-size: 12px; }',
+        '  .panel-title { fill: #E2E8F0; font-size: 14px; font-weight: 600; }',
+        '  .axis-label { fill: #94A3B8; font-size: 11px; }',
+        '  .grid { stroke: #1E293B; stroke-width: 1; }',
+        '  .axis { stroke: #475569; stroke-width: 1.2; }',
+        '  .legend { fill: #CBD5E1; font-size: 11.5px; font-weight: 500; }',
+        '  .note { fill: #94A3B8; font-size: 10.5px; }',
+        '</style>',
+        '</defs>',
+        f'<rect width="{W}" height="{H}" fill="#0B1018"/>',
+        '<text x="75" y="34" class="title">Beyond the Light Cone (GDD v0.15.0) — 5-Strategy Monte Carlo Ensemble (N = 1,000 / strategy)</text>',
+        (
+            f'<text x="75" y="54" class="subtitle">'
+            f'Human Curve Fit R2_log = {fit["r2_log"]:.4f} | '
+            f'Exponential Productivity + Stochastic Superposition -> Continuous Point Rate v_E(t) | '
+            f'Upgrade Costs 1 / 2 / 4 / 8 pts'
+            f'</text>'
+        ),
+    ]
 
-svg.append('</svg>')
-out_svg = ROOT / "sim_curves.svg"
-out_svg.write_text("\n".join(svg), encoding="utf-8")
-print(f"Wrote {out_svg}")
+    # Top Legend (2 clean non-overlapping rows)
+    legend_coords = [
+        (75, 76),
+        (360, 76),
+        (705, 76),
+        (75, 98),
+        (410, 98),
+    ]
+    for idx, (key, label, color, dash) in enumerate(STRATEGIES):
+        lx, ly = legend_coords[idx]
+        dash_attr = f' stroke-dasharray="{dash}"' if dash != "none" else ""
+        surv = summary[key]["survival_5000yr"] * 100
+        svg.append(f'<line x1="{lx}" y1="{ly - 4}" x2="{lx + 22}" y2="{ly - 4}" stroke="{color}" stroke-width="2.5"{dash_attr}/>')
+        svg.append(f'<text x="{lx + 28}" y="{ly}" class="legend">{label} ({surv:.1f}%)</text>')
+
+    panels = [
+        ("A. Civilization Survival Curve  S(t)", 75, 134, 455, 260, 0.0, 100.0, "%", "surv_pct"),
+        ("B. Mean Civilization Scale  K(t)  [K0 = 0.56]", 625, 134, 455, 260, 0.50, 2.00, "K", "mean_k"),
+        ("C. Mean Point Accrual Speed  v_E(t)  [pts / 100 sim yr]", 75, 474, 455, 260, 0.0, 3.0, "", "mean_v_e"),
+        ("D. Mean Cumulative Earned Points  E_cum(t)", 625, 474, 455, 260, 0.0, 100.0, " pts", "mean_e_cum"),
+        ("E. Mean Systemic Fragility  SDI(t)", 75, 814, 455, 260, 0.0, 100.0, "%", "mean_sdi"),
+        ("F. Cumulative Neighbor Lock Rate  P(Lock)", 625, 814, 455, 260, 0.0, 25.0, "%", "lock_pct"),
+    ]
+
+    y_ticks_map = {
+        "surv_pct": [0, 20, 40, 60, 80, 100],
+        "mean_k": [0.56, 0.73, 0.86, 1.05, 1.35, 1.65, 2.00],
+        "mean_v_e": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0],
+        "mean_e_cum": [0, 25, 50, 75, 100],
+        "mean_sdi": [0, 20, 40, 60, 80, 100],
+        "lock_pct": [0, 5, 10, 15, 20, 25],
+    }
+
+    for title, px, py, pw, ph, ymin, ymax, unit, field in panels:
+        svg.append(f'<rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="6" fill="#121A26" stroke="#24344A"/>')
+        svg.append(f'<text x="{px}" y="{py - 12}" class="panel-title">{title}</text>')
+
+        for yt in y_ticks_map[field]:
+            yy = lerp_y(yt, ymin, ymax, py, ph)
+            svg.append(f'<line x1="{px}" y1="{yy:.1f}" x2="{px + pw}" y2="{yy:.1f}" class="grid"/>')
+            lbl = f"{yt:.2f}" if field == "mean_k" else (f"{yt:.1f}" if field == "mean_v_e" else f"{int(yt)}{unit}")
+            svg.append(f'<text x="{px - 8}" y="{yy + 4:.1f}" text-anchor="end" class="axis-label">{lbl}</text>')
+
+        for xt in [0, 1000, 2000, 3000, 4000, 5000]:
+            xx = lerp_x(xt, px, pw)
+            svg.append(f'<line x1="{xx:.1f}" y1="{py}" x2="{xx:.1f}" y2="{py + ph}" class="grid"/>')
+            svg.append(f'<text x="{xx:.1f}" y="{py + ph + 16}" text-anchor="middle" class="axis-label">{xt}y</text>')
+
+        # Reference lines
+        if field == "mean_k":
+            for ref_k, ref_lbl in [(0.73, "Crit Ref K=0.73"), (0.86, "1-Planet Cap 0.86"), (1.05, "System Cap 1.05")]:
+                ry = lerp_y(ref_k, ymin, ymax, py, ph)
+                svg.append(f'<line x1="{px}" y1="{ry:.1f}" x2="{px + pw}" y2="{ry:.1f}" stroke="#38BDF8" stroke-width="1" stroke-dasharray="3,3" opacity="0.45"/>')
+                svg.append(f'<text x="{px + pw - 6}" y="{ry - 3:.1f}" text-anchor="end" class="note" style="fill:#38BDF8;opacity:0.8">{ref_lbl}</text>')
+        elif field == "mean_e_cum":
+            ry = lerp_y(75.0, ymin, ymax, py, ph)
+            svg.append(f'<line x1="{px}" y1="{ry:.1f}" x2="{px + pw}" y2="{ry:.1f}" stroke="#FBBF24" stroke-width="1.1" stroke-dasharray="4,3" opacity="0.75"/>')
+            svg.append(f'<text x="{px + 8}" y="{ry - 4:.1f}" class="note" style="fill:#FBBF24">Max 5-Branch Tech Cap (75 pts)</text>')
+
+        svg.append(f'<line x1="{px}" y1="{py}" x2="{px}" y2="{py + ph}" class="axis"/>')
+        svg.append(f'<line x1="{px}" y1="{py + ph}" x2="{px + pw}" y2="{py + ph}" class="axis"/>')
+
+        for key, _, color, dash in STRATEGIES:
+            c = curves[key]
+            pts = []
+            for tv, yv in zip(c["t"], c[field]):
+                xx = lerp_x(tv, px, pw)
+                yy = lerp_y(yv, ymin, ymax, py, ph)
+                pts.append(f"{xx:.1f},{yy:.1f}")
+            dash_attr = f' stroke-dasharray="{dash}"' if dash != "none" else ""
+            svg.append(f'<polyline fill="none" stroke="{color}" stroke-width="2.2"{dash_attr} points="{" ".join(pts)}"/>')
+
+        # Panel annotations
+        if field == "surv_pct":
+            svg.append(f'<text x="{px + 280}" y="{py + 88}" class="note" style="fill:#4CF2A0">Balanced: 62.2%</text>')
+            svg.append(f'<text x="{px + 280}" y="{py + 128}" class="note" style="fill:#C084FC">Obs-Rusher: 48.1%</text>')
+            svg.append(f'<text x="{px + 280}" y="{py + 150}" class="note" style="fill:#38BDF8">System Hermit (B4): 27.2%</text>')
+            svg.append(f'<text x="{px + 12}" y="{py + 226}" class="note" style="fill:#F59E0B">Expander: 12.1% (Cold War)</text>')
+            svg.append(f'<text x="{px + 12}" y="{py + 242}" class="note" style="fill:#F43F5E">Planet Hermit: 6.4% (B1b + B4)</text>')
+        elif field == "mean_v_e":
+            svg.append(f'<text x="{px + 12}" y="{py + 20}" class="note">Ensemble mean of +/-65% OU, harmonic &amp; jump ripples</text>')
+        elif field == "mean_sdi":
+            svg.append(f'<text x="{px + 12}" y="{py + 20}" class="note">Threshold >= 45% triggers Cold War fragility risk</text>')
+            ry_sdi = lerp_y(45.0, ymin, ymax, py, ph)
+            svg.append(f'<line x1="{px}" y1="{ry_sdi:.1f}" x2="{px + pw}" y2="{ry_sdi:.1f}" stroke="#F59E0B" stroke-width="1" stroke-dasharray="4,3" opacity="0.65"/>')
+
+    svg.append(
+        f'<text x="75" y="{H - 22}" class="note">'
+        f'Sim Engine: scripts/calibration/sim_civ_dynamics.py (GDD v0.15.0, pure mathematical growth model) | Horizon 5,000 sim yr | dt = 10y'
+        f'</text>'
+    )
+    svg.append('</svg>')
+
+    with open(OUT_SVG, "w", encoding="utf-8") as f:
+        f.write("\n".join(svg))
+    print(f"Wrote {OUT_SVG} ({len(svg)} lines)")
+
+
+if __name__ == "__main__":
+    main()

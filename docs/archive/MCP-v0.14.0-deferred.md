@@ -1,6 +1,10 @@
-# 《光锥之外》MCP 接口规格（v0.13.0 · 文明球因果闭合版）
+> [!NOTE]
+> 本文档为 **GDD v0.14.0** 阶段起草的大模型 / MCP 外部 L2 副官规格存档。依据最新架构决策（**GDD v0.15.0**）：M1–M4 暂移除大模型运行时与 MCP Server，优先稳定万级单图同服架构、Google 登录海外 Web-first 客户端与纯数学演化曲线；外部 Agent 副官统一通过 [`docs/specs/SEAT-CONTRACT.md`](../specs/SEAT-CONTRACT.md) 预留的 `ActorPrincipal` 与 `SeatCommand` 幂等总线在 M4+ 后扩展接入。
 
-本附录定义 M3 的观测、控制与 L1 自治接口，以及 M4 的宪政投票接口。物理规则与数值定义以 [当前 GDD（v0.13.0）](../../DESIGN.md) 为准。服务端采用 JSON-RPC 2.0 与 Streamable HTTP，支持资源更新通知。若提供本地 CLI 桥接，桥接与远程入口共用同一鉴权、光锥裁剪与权限裁定。
+
+# 《光锥之外》MCP 接口规格（v0.14.0 · 文明球因果闭合版）
+
+本附录定义 M3 的观测、控制与 L1 自治接口，以及 M4 的宪政投票接口。物理规则与数值定义以 [当前 GDD（v0.14.0）](../../DESIGN.md) 为准。服务端采用 JSON-RPC 2.0 与 Streamable HTTP，支持资源更新通知。若提供本地 CLI 桥接，桥接与远程入口共用同一鉴权、光锥裁剪与权限裁定。
 
 ## 1. 文明席位、坐标系与双时钟口径
 
@@ -12,7 +16,7 @@
 
 | Resource URI | 返回内容 |
 | :--- | :--- |
-| `civilization://self/telemetry` | `k_tier`、`r_civ`、`r_target`、`controlled_node_count`、`known_reachable_node_count`、`r_persist`（最近确认的网络摘要，口径见下文）、`sdi_total`、`sdi_breakdown`（内卷、延迟、能级科技、脉冲、固定事件、已抵达的交叠摩擦 `overlap_arrived`）、`sdi_pulse_rem_real_s`、`strike_cd_rem_real_s`、`beacon_cd_rem_real_s`、`decoy_active_count`、`heat_sink_pct`、`heat_vent_rem_real_s`、`dormancy_active`、`migrate_cd_rem_real_s`、`m_recoil_active`、`traits_13`、`tech_levels_5`、`evo_points_avail`、`mandate_remaining_real_s`、`local_clutter_noise_ratio`（已抵达波前决定的局地噪底倍率）、`telescope: {theta, phi, omega_a, dwell_real_s, slew_rem_real_s, eta_int}`。 |
+| `civilization://self/telemetry` | `k_tier`、`k_value`、`stage`（`"single_planet" \| "multi_planet" \| "multi_star"`）、`n_worlds`、`n_eff_stars`、`r_civ`、`r_target`、`controlled_node_count`、`known_reachable_node_count`、`r_persist`（最近确认的网络摘要，口径见下文）、`sdi_total`、`sdi_breakdown`（内卷、核威慑 `nuke`、行星后勤 `colony`、延迟记忆 `lag_strain_u`、能级科技、脉冲、固定事件、已抵达的交叠摩擦 `overlap_arrived`）、`sdi_pulse_rem_sim_s`（生态衰减绑定 `40 sim yr` 时轴；客户端按 $\kappa_t$ 换算展示）、`strike_cd_rem_real_s`、`beacon_cd_rem_real_s`、`decoy_active_count`、`heat_sink_pct`、`heat_vent_rem_real_s`、`dormancy_active`、`migrate_cd_rem_real_s`、`m_recoil_active`、`traits_13`、`tech_levels_5`、`evo_points_avail`、`mandate_remaining_real_s`、`local_clutter_noise_ratio`（已抵达波前决定的局地噪底倍率）、`telescope: {theta, phi, omega_a, dwell_real_s, slew_rem_real_s, eta_int}`。 |
 | `civilization://self/network` | 指挥核持有的节点状态报告 `nodes`、已知有向链路 `links` 和当地待回执的前沿请求 `pending_frontier_requests`。各记录保留其报告时间或本地排程时间。 |
 | `civilization://lightcone/wavefronts` | 已抵达且 $\mathrm{SNR}\ge 1$ 的波前观测数组。基础项含 `event_id`、`t_arrive_sim_s`、`band`（`ir` / `radio` / `nir_laser` / `gw` / `xray_shock`）与 `snr_current`。**二维方位／光谱锁（$\mathrm{SNR}\ge 5$，单站）**返回 `local_dir_vec3`、`dir_sigma_rad`、`apparent_angle_deg`、`doppler_shift_est`、`spectrum_k_est`、`is_decoy_verified`、`ping_payload`，**不直接返回三维坐标**。**仅当满足 GDD §7.2 三维星历定位证据**（`ranging_evidence`: `"catalog_match" \| "parallax" \| "two_way_echo"`）后，才追加 `ranging_evidence`、`t_source_sim_s`、`local_pos_vec3`、`pos_sigma_ly`、`local_velocity_vec3`、`vel_sigma_mps`、`progenitor_unstable` 及作用域内 `target_node_id`。符合迁徙条件的公开导航节点附 `navigation_node_id`。 |
 | `civilization://dormancy/reflex_rules` | `{max_slots: 3, active_rules: [{slot, condition_expr, action_cmd, cooldown_rem_real_s}]}`。条件与动作均为白名单结构化枚举。 |
@@ -35,7 +39,7 @@
 | :--- | :--- | :--- |
 | `set_sphere_radius` | `{r_target: number}` | 有限数值。指挥核按已知能级上限、备份摇篮下限 $R_{\text{floor}}$ 与状态约束钳制，返回已接受的目标半径。包络按 $\le 0.25c$ 演化并驱动前沿策略。接入与退网在相应节点按已抵达的指令或已授权的当地条件执行。指挥核通过实际回执得知结果。 |
 | `orient_telescope` | `{theta_deg: number, phi_deg: number, omega_deg2: number}` | 校验视场与观测科技允许范围。改指向或收窄视场按 GDD §7.2 重置驻留积分；观测 Lv.4 转向 $>15^\circ$ 结算 **45 real s** 焦点轨重构延迟。 |
-| `allocate_evolution_point` | `{dimension: "obs" \| "beacon" \| "stealth" \| "strike" \| "persist" \| "k_tier_up"}` | 副官须有 `ALLOW_AGENT_TECH_ALLOC`。校验点数、前置、能级、单一施工位及闪电服工期倍率；`k_tier_up` 不扣点。 |
+| `allocate_evolution_point` | `{dimension: "obs" \| "beacon" \| "stealth" \| "strike" \| "persist" \| "world_up" \| "k_tier_up"}` | 副官须有 `ALLOW_AGENT_TECH_ALLOC`。校验点数、前置、能级、单一施工位及闪电服工期倍率；`world_up`（摇篮内多行星扩展，`30 real min` 基准）与 `k_tier_up` 均不扣进化点。 |
 | `set_stealth_mode` | `{mode: "none" \| "emcon" \| "hemisphere" \| "heat_sink" \| "vent_sink" \| "blackbody_mimic", axis_vec3?}` | 切换隐匿或热沉排热：`heat_sink` 蓄热上限 180 real min（总排热 $0.006$）；`vent_sink` 以 $5.0\times$ 稳态排热，满载精确耗时 **44.73 real min**（未满按比例缩时）；`blackbody_mimic` 检查 $R_{\text{civ}}\le 0.05\ \mathrm{ly}$ 并禁发信标与扩张。 |
 | `emit_directed_ray` | `{ray_type, local_dir_vec3: [x,y,z], options?: {decoy_radius?: number, target_node_id?: string, message?: string}}` | `ray_type` 取 `ping`、`laser`、`decoy_probe`、`kinetic_pulse`、`rkv`、`berserker`、`dyson_beam` 或 `induce_grb`。副官发射打击须有 `ALLOW_AGENT_STRIKE`。指向打击须引用已获得三维星历定位的 `target_node_id`，瞄准直接计入定位误差 $(\boldsymbol\sigma_x,\boldsymbol\sigma_v)$；`dyson_beam` 按聚焦／误差斑受照注量结算毁伤；`induce_grb` 额外校验 `progenitor_unstable == true`。 |
 | `deflect_b1` | `{event_id: string}` | 偏转已预警且未结算的 B1 事件，须已完成观测 Lv.1 与打击 Lv.1，不占用常规打击冷却。 |

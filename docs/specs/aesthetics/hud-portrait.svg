@@ -90,9 +90,9 @@
 
       <!-- 顶部 HUD -->
       <text x="28" y="30" class="lab3 mono">9:41</text>
-      <text x="20" y="72" class="lab">E01 · 中密度 · 席位 A</text>
+      <text x="20" y="72" class="lab">永续银盘 · 旋臂扇区 · 席位 A</text>
       <text x="20" y="98" class="ink serif" font-size="18">天时 <tspan class="mono" font-size="17">20.9</tspan> 年</text>
-      <text x="150" y="98" class="lab mono" font-size="13" fill="#9AA9BA">人时 31:21</text>
+      <text x="150" y="98" class="lab3" font-size="11">纯享观星 · 队列 (3)</text>
       <g transform="translate(336,84)">
         <circle r="17" class="rule" stroke-width="3"/>
         <path d="M 0 -17 A 17 17 0 0 1 11.6 -12.4" fill="none" stroke="#2C7F99" stroke-width="3"/>
@@ -202,9 +202,9 @@
 
       <!-- 顶部 HUD（同手机 1） -->
       <text x="28" y="30" class="lab3 mono">9:41</text>
-      <text x="20" y="72" class="lab">E01 · 中密度 · 席位 A</text>
+      <text x="20" y="72" class="lab">永续银盘 · 旋臂扇区 · 席位 A</text>
       <text x="20" y="98" class="ink serif" font-size="18">天时 <tspan class="mono" font-size="17">20.9</tspan> 年</text>
-      <text x="150" y="98" class="lab mono" font-size="13" fill="#9AA9BA">人时 31:21</text>
+      <text x="150" y="98" class="lab3" font-size="11">纯享观星 · 队列 (3)</text>
       <g transform="translate(336,84)">
         <circle r="17" class="rule" stroke-width="3"/>
         <path d="M 0 -17 A 17 17 0 0 1 11.6 -12.4" fill="none" stroke="#2C7F99" stroke-width="3"/>
@@ -229,7 +229,7 @@
       <text x="24" y="588" class="lab">距离（星表）</text>
       <text x="24" y="610" class="ink mono" font-size="16">4.00<tspan class="lab"> ly</tspan></text>
       <text x="24" y="642" class="lab">单程光行</text>
-      <text x="24" y="664" class="ink mono" font-size="16">4.0<tspan class="lab"> 年 · 人时 </tspan>6:00</text>
+      <text x="24" y="664" class="ink mono" font-size="16">4.0<tspan class="lab"> 年 · 人时 </tspan>4:00</text>
       <text x="24" y="696" class="lab">最近报告</text>
       <text x="24" y="718" class="lab3 mono" font-size="14">— 尚无来自 B 的光信</text>
 
@@ -255,8 +255,8 @@
     <rect width="810" height="96" rx="12" fill="#080C12" stroke="#24344A" stroke-dasharray="5 3"/>
     <rect x="18" y="12" width="118" height="20" rx="4" fill="#6FE3FF" fill-opacity="0.08" stroke="#6FE3FF" stroke-opacity="0.35"/>
     <text x="77" y="26" text-anchor="middle" fill="#6FE3FF" font-size="10.5">M2 离线原型调试条</text>
-    <text x="148" y="26" class="lab">仅用于 M2 本地演示与 M4 显影回放；M3+ 正式实时对局隐藏此条（光速不可暂停 / 倍速）</text>
-    <text x="792" y="26" text-anchor="end" class="lab mono">00:00  ·  <tspan class="ink">31:21</tspan>  /  65:51</text>
+    <text x="148" y="26" class="lab">仅用于 M2 本地原型演示；M3+ 正式永续联机对局无此条（光速不可暂停 / 倍速）</text>
+    <text x="792" y="26" text-anchor="end" class="lab mono">00:00  ·  <tspan class="ink">20:54</tspan>  /  43:54</text>
 
     <!-- 暂停 || -->
     <rect x="18" y="49" width="76" height="32" rx="16" fill="#0A0F17" stroke="#364A66"/>
@@ -275,7 +275,7 @@
     <path d="M233 65 A 5.5 5.5 0 1 1 228 59.5 M228 56 L231.5 59.5 L228 63" fill="none" stroke="#9AA9BA" stroke-width="1.3"/>
     <text x="257" y="69" text-anchor="middle" class="ink" font-size="11.5">重播</text>
 
-    <!-- 演示时间轴进度条（31:21 / 65:51，59:51 为扩张到达 B 刻度） -->
+    <!-- 演示时间轴进度条（20:54 / 43:54，39:54 为扩张到达 B 刻度） -->
     <line x1="304" y1="65" x2="616" y2="65" stroke="#1E2B3D" stroke-width="3" stroke-linecap="round"/>
     <line x1="304" y1="65" x2="452" y2="65" stroke="#6FE3FF" stroke-opacity="0.7" stroke-width="3" stroke-linecap="round"/>
     <line x1="588" y1="59" x2="588" y2="71" stroke="#5C6B7D" stroke-width="1.2"/>

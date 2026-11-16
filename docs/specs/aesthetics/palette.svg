@@ -73,7 +73,7 @@
     <rect x="512" width="112" height="72" rx="4" fill="#4CF2A0"/>
     <rect x="640" width="112" height="72" rx="4" fill="#FF4FA3"/>
     <rect x="768" width="112" height="72" rx="4" fill="#A98BFF"/>
-    <rect x="896" width="112" height="72" rx="4" fill="#FF3B47"/>
+    <rect x="896" width="112" height="72" rx="4" fill="#D96B43"/>
     <text x="0"   y="94" class="n">光锥青 · 己方</text><text x="0"   y="110" class="x">self     #6FE3FF</text>
     <text x="128" y="94" class="n">青影 · 己方弱化</text><text x="128" y="110" class="x">self-dim #2C7F99</text>
     <text x="256" y="94" class="n">波前白 · 光本身</text><text x="256" y="110" class="x">front    #EAF2FF</text>
@@ -81,7 +81,7 @@
     <text x="512" y="94" class="n">射电磷绿 · 信标</text><text x="512" y="110" class="x">radio    #4CF2A0</text>
     <text x="640" y="94" class="n">近红外品红 · 激光</text><text x="640" y="110" class="x">laser    #FF4FA3</text>
     <text x="768" y="94" class="n">引力波紫 · 星碑</text><text x="768" y="110" class="x">gw       #A98BFF</text>
-    <text x="896" y="94" class="n">警示赤 · 仅 HUD</text><text x="896" y="110" class="x">alert    #FF3B47</text>
+    <text x="896" y="94" class="n">余烬赭 · 仅 HUD</text><text x="896" y="110" class="x">alert    #D96B43</text>
   </g>
 
   <!-- 4 状态与面积配比 -->
