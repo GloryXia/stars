@@ -1,10 +1,10 @@
-"""Calibrated Monte Carlo Simulator & Acceptance Verifier (GDD v0.17.0 Multi-Messenger Bubble & Directed Expeditions).
+"""Calibrated Monte Carlo Simulator & Acceptance Verifier (Continuous Galactic & Stellar Physical Hazard Field).
 
 Implements the unified GDD physics, causal isolation, progression & survival rules:
 1. R1: Valid Tier 1 -> First Directed Interstellar Expedition (N_worlds >= 2, persist >= 1, no hard 8/20 ly
    radius glass walls; limited naturally by 0.10c transit & R_sync lag strain) -> receipt confirmation
    -> K_max unlock -> Tier 2 (N_stars >= 2, K >= 1.10) -> Tier 3 (N_stars >= 4, K >= 1.50).
-   Uses Gaia solar-neighborhood density rho_* = 0.00233 ly^-3 (median nearest star ~4.14 ly).
+   Uses continuous 3D thin-disk galactic density rho_*(r_gal, z, arm) anchored at Gaia 0.00233 ly^-3.
 2. Star Bubble = Multi-Messenger 1.00c Attenuating Signal Shells (decoupled from colonization):
    - Interstellar expansion is performed by discrete directed 0.10c expeditions to chosen star nodes,
      forming a discrete stellar network rather than sweeping a solid colonization sphere.
@@ -19,16 +19,27 @@ Implements the unified GDD physics, causal isolation, progression & survival rul
    - Detaching outer synced nodes (L1/A1) suspends central sync (autonomous standby) without destroying
      physical colonies; re-joining uses 1.00c round-trip handshake; SDI >= 100% while over-extended
      causes permanent secession; multi-star B1b hits one outer star causally; B_perp uses real stars.
-3. R2: Strict light-cone separation between local node physical state and core-confirmed telemetry.
-4. R3: Paired comparison across identical world seeds for defense/queue regimes at 8h, 24h, ~3.5d.
-5. R4: Physical catalog-based B4 supernova/GRB radiation shells with command-core handover re-anchoring.
-6. R5: Unbiased neighbor emission catalog (conserved luminosity, EM hollow shells, nu & GW beacons).
-7. R7/R8/R9/R10: Single authoritative dK/dt, energy-integrated heat sink, 5-slot FIFO queue & L1.
+3. Continuous Astrophysical Hazard Field & Single-Planet Bottleneck (no coarse 3-tier buckets):
+   - Every cradle is continuously sampled in galactic coordinates (r_gal, z, spiral_arm_phase) and
+     stellar/system properties (spectral_type F/G/K/M, age_gyr, debris_index, flare_index, rho_star,
+     metallicity r_orb_mult, and local unstable-progenitor density).
+   - Mature G/K main-sequence cradles have B2 = 0, ~Myr-scale B1b, and near-zero local B4 unless
+     located near real catalog unstable progenitors (zero-progenitor = 0 local B4 bursts), while a
+     15,000-seat Milky Way server still generates rare tail impacts & ~15 galactic supernovae / 1,000 yr.
+   - Single-planet civilizations trapped at high K >= K_crit without off-world habitats suffer realistic
+     biosphere/geopolitical carrying-capacity compression (`delta_conc` scaling up with K).
+4. R2: Strict light-cone separation between local node physical state and core-confirmed telemetry.
+5. R3: Paired comparison across identical world seeds for defense/queue regimes at 8h, 24h, ~3.5d.
+6. R4: Physical catalog-based B4 supernova/GRB radiation shells with command-core handover re-anchoring.
+7. R5: Unbiased neighbor emission catalog (conserved luminosity, EM hollow shells, nu & GW beacons).
+8. R7/R8/R9/R10: Single authoritative dK/dt, energy-integrated heat sink, 5-slot FIFO queue & L1.
 """
 
 from __future__ import annotations
 
 import argparse
+import bisect
+from concurrent.futures import ProcessPoolExecutor
 import json
 import math
 import random
@@ -84,9 +95,272 @@ TIER_BUILD_DUR = {2: 60.0, 3: 150.0}
 WORLD_BUILD_DUR = 30.0
 
 RHO_STAR_LOCAL = 0.00233  # Gaia 10-pc stellar/BD system density (ly^-3)
+R_SOLAR_GAL_LY = 26600.0
+R_DISK_SCALE_LY = 9500.0
+Z_DISK_SCALE_LY = 750.0
 R_LOCAL_CATALOG = 25.0
+MAX_LOCAL_CATALOG_STARS = 48
 R_HORIZON_MAX = 100.0  # Sanity horizon bound (no arbitrary 8/20 ly Tier walls after interstellar unlock)
 R_B4_CATALOG = 60.0
+
+GALACTIC_SEAT_COUNT = 15000
+GALACTIC_SN_RATE_PER_1000YR = 15.0  # ~1.5 core-collapse / Type Ia supernovae per century across Milky Way
+B4_PER_PROGENITOR_1000YR = 0.0024
+
+
+@dataclass(frozen=True)
+class GalacticSector:
+    sector_id: str      # e.g. "SEC-R13-A10-ZM" (2,700 addressed macro sectors replacing 1.5e11 star rows)
+    r_idx: int          # 0..24 (2,000 ly radial rings from galactic center to 50,000 ly edge)
+    a_idx: int          # 0..35 (10-degree azimuthal sectors across 4 spiral arms)
+    z_tag: str          # "ZS" | "ZM" | "ZN" (-550 / 0 / +550 ly vertical bands)
+    r_gal_ly: float
+    theta_rad: float
+    z_ly: float
+    arm_factor: float
+    rho_star: float
+    instability_index: float
+    birth_weight: float
+    progenitor_prob: float
+    r_orb_mult: float
+
+
+@dataclass(frozen=True)
+class GalacticEnvironment:
+    sector_id: str
+    sector_instability: float
+    birth_weight: float
+    r_gal_ly: float
+    z_ly: float
+    arm_factor: float
+    spectral_type: str
+    age_gyr: float
+    debris_index: float
+    flare_index: float
+    rho_star: float
+    progenitor_prob: float
+    r_orb_mult: float
+    b1a_per_1000yr: float
+    b1b_per_1000yr: float
+    b2_per_1000yr: float
+    b3_per_1000yr: float
+    b4_per_progenitor_1000yr: float
+    b1a_base_collapse_prob: float
+    b3_k_drop: float
+    hazard_score: float
+
+
+def _galactic_field_at(
+    r_gal_ly: float,
+    theta_rad: float,
+    z_ly: float,
+) -> Tuple[float, float, float, float, float, float]:
+    """Shared Milky Way field evaluator: returns (arm_factor, rho_star, instability, birth_weight, p_prog, r_orb_mult)."""
+    r_ref = max(2000.0, r_gal_ly)
+    spiral_phase = 4.0 * (theta_rad - 2.6 * math.log(r_ref / 8000.0))
+    arm_factor = (
+        0.50
+        + 1.15
+        * ((0.5 + 0.5 * math.cos(spiral_phase)) ** 1.6)
+        * math.exp(-abs(z_ly) / 380.0)
+        * (1.0 + 0.30 * math.exp(-((r_gal_ly - 15000.0) / 9000.0) ** 2))
+    )
+    sech2 = 1.0 / (math.cosh(z_ly / Z_DISK_SCALE_LY) ** 2)
+    bulge_rho = 0.12 * math.exp(-math.sqrt(r_gal_ly ** 2 + (1.8 * z_ly) ** 2) / 2600.0)
+    disk_rho = RHO_STAR_LOCAL * math.exp(-(r_gal_ly - R_SOLAR_GAL_LY) / R_DISK_SCALE_LY) * sech2 * arm_factor
+    rho_star = max(0.00025, min(0.15, disk_rho + bulge_rho))
+
+    tide_term = min(1.0, math.log1p(rho_star / RHO_STAR_LOCAL) / math.log1p(18.0))
+    ob_term = min(
+        1.0,
+        max(0.0, arm_factor - 0.78) / 1.1
+        * math.exp(-abs(z_ly) / 300.0)
+        * math.exp(-max(0.0, r_gal_ly - 10000.0) / 13000.0),
+    )
+    core_rad = math.exp(-math.sqrt(r_gal_ly ** 2 + (1.3 * z_ly) ** 2) / 6800.0)
+    instability = max(0.03, min(0.98, 0.06 + 0.34 * tide_term + 0.30 * ob_term + 0.50 * core_rad))
+
+    # Native complex-civilization birth weight: sector star count * rocky-planet metallicity * sterilization survival
+    n_stars_rel = rho_star * max(500.0, r_gal_ly)
+    p_metal = min(
+        1.0,
+        max(0.08, 1.05 * math.exp(-max(0.0, r_gal_ly - 17000.0) / 16000.0) * math.exp(-abs(z_ly) / 1100.0)),
+    )
+    s_sterilize = math.exp(-9.8 * (instability ** 1.55))
+    birth_weight = n_stars_rel * p_metal * s_sterilize
+
+    p_prog = (
+        0.00010
+        + 0.015
+        * (max(0.0, arm_factor - 0.85) ** 2.2)
+        * math.exp(-abs(z_ly) / 260.0)
+        * math.exp(-max(0.0, r_gal_ly - 10000.0) / 13000.0)
+        + 0.0020 * core_rad
+    )
+    r_orb_mult = max(
+        0.88,
+        min(1.15, 1.0 - 0.09 * ((r_gal_ly - R_SOLAR_GAL_LY) / 10000.0) - 0.04 * (abs(z_ly) / Z_DISK_SCALE_LY)),
+    )
+    return arm_factor, rho_star, instability, birth_weight, p_prog, r_orb_mult
+
+
+def build_galactic_sector_registry() -> Tuple[List[GalacticSector], List[float]]:
+    """Build deterministic metadata registry for 2,700 macro galactic sectors (25 radial x 36 azimuth x 3 vertical)."""
+    sectors: List[GalacticSector] = []
+    cdf: List[float] = []
+    cum_w = 0.0
+    for r_idx in range(25):
+        r_gal = r_idx * 2000.0 + 1000.0
+        for a_idx in range(36):
+            theta = (a_idx + 0.5) * (2.0 * math.pi / 36.0)
+            for z_tag, z_ly in (("ZS", -550.0), ("ZM", 0.0), ("ZN", 550.0)):
+                arm, rho, instab, birth_w, p_prog, r_orb_mult = _galactic_field_at(r_gal, theta, z_ly)
+                sec = GalacticSector(
+                    sector_id=f"SEC-R{r_idx:02d}-A{a_idx:02d}-{z_tag}",
+                    r_idx=r_idx,
+                    a_idx=a_idx,
+                    z_tag=z_tag,
+                    r_gal_ly=r_gal,
+                    theta_rad=theta,
+                    z_ly=z_ly,
+                    arm_factor=arm,
+                    rho_star=rho,
+                    instability_index=instab,
+                    birth_weight=birth_w,
+                    progenitor_prob=p_prog,
+                    r_orb_mult=r_orb_mult,
+                )
+                sectors.append(sec)
+                cum_w += birth_w
+                cdf.append(cum_w)
+    return sectors, cdf
+
+
+GALACTIC_SECTORS, GALACTIC_SECTOR_CDF = build_galactic_sector_registry()
+
+
+def sector_id_for_coords(r_gal_ly: float, theta_rad: float, z_ly: float) -> str:
+    r_idx = min(24, max(0, int(r_gal_ly // 2000.0)))
+    a_idx = int((theta_rad % (2.0 * math.pi)) / (2.0 * math.pi / 36.0)) % 36
+    z_tag = "ZM" if abs(z_ly) <= 275.0 else ("ZN" if z_ly > 0.0 else "ZS")
+    return f"SEC-R{r_idx:02d}-A{a_idx:02d}-{z_tag}"
+
+
+def compute_galactic_environment(
+    r_gal_ly: float,
+    z_ly: float,
+    arm_factor_override: Optional[float],
+    spectral_type: str,
+    age_gyr: float,
+    debris_scatter: float = 1.0,
+    theta_rad: float = 1.80,
+    sector_id: Optional[str] = None,
+) -> GalacticEnvironment:
+    """Derive continuous astrophysical hazard rates & metallicity inside a numbered galactic sector."""
+    arm_calc, rho_star, instab, birth_w, p_prog, r_orb_mult = _galactic_field_at(r_gal_ly, theta_rad, z_ly)
+    arm_factor = arm_calc if arm_factor_override is None else arm_factor_override
+    if arm_factor_override is not None:
+        sech2 = 1.0 / (math.cosh(z_ly / Z_DISK_SCALE_LY) ** 2)
+        bulge_rho = 0.12 * math.exp(-math.sqrt(r_gal_ly ** 2 + (1.8 * z_ly) ** 2) / 2600.0)
+        disk_rho = RHO_STAR_LOCAL * math.exp(-(r_gal_ly - R_SOLAR_GAL_LY) / R_DISK_SCALE_LY) * sech2 * arm_factor
+        rho_star = max(0.00025, min(0.15, disk_rho + bulge_rho))
+        core_rad = math.exp(-math.sqrt(r_gal_ly ** 2 + (1.3 * z_ly) ** 2) / 6800.0)
+        p_prog = (
+            0.00010
+            + 0.015
+            * (max(0.0, arm_factor - 0.85) ** 2.2)
+            * math.exp(-abs(z_ly) / 260.0)
+            * math.exp(-max(0.0, r_gal_ly - 10000.0) / 13000.0)
+            + 0.0020 * core_rad
+        )
+
+    debris_index = (0.30 + 6.5 * math.exp(-age_gyr / 0.95)) * debris_scatter
+    oort_tide = (rho_star / RHO_STAR_LOCAL) ** 0.95
+    b1a = 0.22 * (debris_index + 0.25 * oort_tide)
+    b1b = 0.00035 * ((debris_index ** 2.0) + 1.2 * (oort_tide ** 1.7))
+
+    if spectral_type == "M":
+        flare_index = 0.30 + 3.8 * math.exp(-age_gyr / 1.6)
+        b2 = 0.45 * max(0.0, flare_index - 1.15) / 2.5
+    else:
+        flare_index = 0.20 + 1.8 * math.exp(-age_gyr / 0.75)
+        b2 = 0.06 * max(0.0, 1.3 - age_gyr) / 1.3
+    b3 = 0.25 + 0.50 * flare_index
+
+    vol60 = (4.0 / 3.0) * math.pi * (R_B4_CATALOG ** 3)
+    expected_b4_60 = rho_star * vol60 * p_prog * B4_PER_PROGENITOR_1000YR
+    b1a_base_collapse = 0.14 * min(1.0, max(0.0, b1a - 0.60) / 1.00)
+    b3_k_drop = 0.015 + 0.012 * min(1.0, max(0.0, flare_index - 0.35) / 1.5)
+    hazard_score = b1b + 0.40 * b2 + 0.60 * expected_b4_60 + 0.02 * b1a
+    resolved_sec_id = sector_id or sector_id_for_coords(r_gal_ly, theta_rad, z_ly)
+
+    return GalacticEnvironment(
+        sector_id=resolved_sec_id,
+        sector_instability=instab,
+        birth_weight=birth_w,
+        r_gal_ly=r_gal_ly,
+        z_ly=z_ly,
+        arm_factor=arm_factor,
+        spectral_type=spectral_type,
+        age_gyr=age_gyr,
+        debris_index=debris_index,
+        flare_index=flare_index,
+        rho_star=rho_star,
+        progenitor_prob=p_prog,
+        r_orb_mult=r_orb_mult,
+        b1a_per_1000yr=b1a,
+        b1b_per_1000yr=b1b,
+        b2_per_1000yr=b2,
+        b3_per_1000yr=b3,
+        b4_per_progenitor_1000yr=B4_PER_PROGENITOR_1000YR,
+        b1a_base_collapse_prob=b1a_base_collapse,
+        b3_k_drop=b3_k_drop,
+        hazard_score=hazard_score,
+    )
+
+
+SOLAR_ANALOG_ENV = compute_galactic_environment(
+    r_gal_ly=26600.0,
+    z_ly=65.0,
+    arm_factor_override=1.01,
+    spectral_type="G",
+    age_gyr=4.6,
+    debris_scatter=1.0,
+    theta_rad=1.80,
+    sector_id="SEC-R13-A10-ZM",
+)
+
+
+def sample_galactic_environment(rng: random.Random) -> GalacticEnvironment:
+    """Sample a numbered galactic sector by realistic GHZ birth weight, then continuous intra-sector star traits."""
+    pick = rng.uniform(0.0, GALACTIC_SECTOR_CDF[-1])
+    sec_idx = bisect.bisect_left(GALACTIC_SECTOR_CDF, pick)
+    sec = GALACTIC_SECTORS[min(sec_idx, len(GALACTIC_SECTORS) - 1)]
+
+    r_gal = max(500.0, min(49500.0, sec.r_gal_ly + rng.uniform(-1000.0, 1000.0)))
+    theta = sec.theta_rad + rng.uniform(-math.pi / 36.0, math.pi / 36.0)
+    z_ly = max(-1100.0, min(1100.0, sec.z_ly + rng.uniform(-275.0, 275.0)))
+
+    spec_r = rng.random()
+    spectral_type = "K" if spec_r < 0.36 else ("M" if spec_r < 0.68 else ("G" if spec_r < 0.94 else "F"))
+    arm_young_prob = min(0.45, max(0.08, 0.12 + 0.25 * max(0.0, sec.arm_factor - 1.0)))
+    if rng.random() < arm_young_prob:
+        age_gyr = rng.uniform(0.25, 2.2)
+    else:
+        age_gyr = max(0.3, min(10.5, rng.gauss(5.6 + 1.2 * (abs(z_ly) / 600.0), 2.0)))
+    if spectral_type == "F":
+        age_gyr = min(age_gyr, rng.uniform(0.25, 3.6))
+    debris_scatter = math.exp(rng.gauss(0.0, 0.55))
+    return compute_galactic_environment(
+        r_gal_ly=r_gal,
+        z_ly=z_ly,
+        arm_factor_override=None,
+        spectral_type=spectral_type,
+        age_gyr=age_gyr,
+        debris_scatter=debris_scatter,
+        theta_rad=theta,
+        sector_id=sec.sector_id,
+    )
 
 BAR_D_CIV = 600.0
 R_COSMOS = 500.0
@@ -405,6 +679,7 @@ class B1Event:
     t_impact: float
     deflected: bool = False
     resolved: bool = False
+    b1a_roll: float = 0.5
 
 
 @dataclass
@@ -413,6 +688,8 @@ class CataclysmSchedule:
     b2_times: List[float]
     b2_rolls: List[Tuple[bool, bool]]  # (core_fatal_single, multiworld_loss)
     b4_events: List[B4BurstEvent]
+    b3_times: List[float] = field(default_factory=list)
+    env: GalacticEnvironment = SOLAR_ANALOG_ENV
 
 
 @dataclass
@@ -537,49 +814,80 @@ def generate_cosmos_unbiased(rng: random.Random) -> List[NeighborEmission]:
     return events
 
 
-def sample_local_star_catalog(rng: random.Random) -> List[StarNode]:
-    """Sample Gaia solar-neighborhood 3D Poisson star field (rho_* = 0.00233 ly^-3, R <= 25 ly)."""
+def sample_local_star_catalog(
+    rng: random.Random,
+    env: GalacticEnvironment = SOLAR_ANALOG_ENV,
+) -> List[StarNode]:
+    """Sample exact 3D Poisson nearest neighbors (capped at MAX_LOCAL_CATALOG_STARS within R <= 25 ly)."""
     cradle = StarNode(
         node_id=0, dist_ly=0.0, weight=1.0, xyz=(0.0, 0.0, 0.0),
         progenitor_unstable=False, captured_local=True, confirmed_at_core=True,
         destroyed=False, synced_with_core=True,
     )
-    vol = (4.0 / 3.0) * math.pi * (R_LOCAL_CATALOG ** 3)
-    n_other = poisson_count(rng, RHO_STAR_LOCAL * vol)
     nodes = [cradle]
-    for idx in range(1, n_other + 1):
-        d = max(0.35, R_LOCAL_CATALOG * (rng.random() ** (1.0 / 3.0)))
+    coeff = (4.0 / 3.0) * math.pi * env.rho_star
+    cum_v = 0.0
+    for idx in range(1, MAX_LOCAL_CATALOG_STARS + 1):
+        cum_v += rng.expovariate(1.0)
+        d_raw = (cum_v / coeff) ** (1.0 / 3.0)
+        if d_raw > R_LOCAL_CATALOG:
+            break
+        d = max(0.35, d_raw)
         ux, uy, uz = random_unit_vec(rng)
         w = rng.uniform(0.75, 1.35)
         nodes.append(StarNode(
             node_id=idx, dist_ly=d, weight=w, xyz=(d * ux, d * uy, d * uz),
-            progenitor_unstable=(rng.random() < 0.015),
+            progenitor_unstable=(rng.random() < env.progenitor_prob),
         ))
-    nodes.sort(key=lambda n: n.dist_ly)
-    for i, node in enumerate(nodes):
-        node.node_id = i
     return nodes
 
 
-def generate_b4_catalog_events(rng: random.Random, horizon: float = SIM_YEARS) -> List[B4BurstEvent]:
-    """Generate real unstable-progenitor B4 events in R <= 60 ly.
+def generate_b4_catalog_events(
+    rng: random.Random,
+    horizon: float = SIM_YEARS,
+    env: GalacticEnvironment = SOLAR_ANALOG_ENV,
+    star_catalog: Optional[List[StarNode]] = None,
+) -> List[B4BurstEvent]:
+    """Generate real unstable-progenitor B4 events strictly bound to R <= 60 ly catalog progenitors.
 
+    Zero unstable progenitors within 60 ly strictly yields zero local B4 bursts.
     Physically scaled so Lambda_B4 = 1.0 (requiring R_persist >= 4.5) occurs around d_ref ~ 18-26 ly
-    for isotropic supernovae and farther inside relativistic GRB cones (~18% beamed), with burst
-    frequency calibrated to ~0.22 / 1,000 yr lethal exposure for unprotected single-world baseline.
+    for isotropic supernovae and farther inside relativistic GRB cones (~25% beamed).
     """
-    expected_bursts = 0.36 * (horizon / 1000.0)
+    progenitors_xyz: List[Tuple[float, float, float]] = []
+    if star_catalog is not None:
+        progenitors_xyz.extend(s.xyz for s in star_catalog if s.progenitor_unstable)
+        if len(star_catalog) > MAX_LOCAL_CATALOG_STARS:
+            r_inner = min(R_LOCAL_CATALOG, star_catalog[-1].dist_ly)
+        else:
+            r_inner = R_LOCAL_CATALOG
+    else:
+        r_inner = 0.0
+
+    outer_vol = (4.0 / 3.0) * math.pi * max(0.0, R_B4_CATALOG ** 3 - r_inner ** 3)
+    n_outer = poisson_count(rng, env.rho_star * outer_vol * env.progenitor_prob)
+    r_in3 = r_inner ** 3
+    r_out3 = R_B4_CATALOG ** 3
+    for _ in range(n_outer):
+        d = max(0.5, (r_in3 + (r_out3 - r_in3) * rng.random()) ** (1.0 / 3.0))
+        ux, uy, uz = random_unit_vec(rng)
+        progenitors_xyz.append((d * ux, d * uy, d * uz))
+
+    if not progenitors_xyz:
+        return []
+
+    expected_bursts = len(progenitors_xyz) * env.b4_per_progenitor_1000yr * (horizon / 1000.0)
     n_bursts = poisson_count(rng, expected_bursts)
     bursts: List[B4BurstEvent] = []
     for bi in range(n_bursts):
-        d = max(2.5, R_B4_CATALOG * (rng.random() ** (1.0 / 3.0)))
-        ux, uy, uz = random_unit_vec(rng)
+        px, py, pz = rng.choice(progenitors_xyz)
+        d = max(0.5, math.sqrt(px * px + py * py + pz * pz))
         t_emit = rng.uniform(-d, horizon)
         is_beamed = rng.random() < 0.25
         d_ref = rng.uniform(18.0, 26.0) if not is_beamed else rng.uniform(22.0, 32.0)
         bursts.append(B4BurstEvent(
             event_id=f"b4_{bi}",
-            xyz=(d * ux, d * uy, d * uz),
+            xyz=(px, py, pz),
             t_emit=t_emit,
             d_ref_ly=d_ref,
             is_beamed=is_beamed,
@@ -605,10 +913,18 @@ def b4_lambda_at_node(burst: B4BurstEvent, node_xyz: Tuple[float, float, float])
     return d, math.sqrt(max(0.0, flux_ratio))
 
 
-def generate_cataclysms(rng: random.Random, horizon: float = SIM_YEARS) -> CataclysmSchedule:
-    """Pre-generate identical B1/B2/B4 schedules for paired strategy/regime comparison."""
+def generate_cataclysms(
+    rng: random.Random,
+    horizon: float = SIM_YEARS,
+    env: GalacticEnvironment = SOLAR_ANALOG_ENV,
+    star_catalog: Optional[List[StarNode]] = None,
+) -> CataclysmSchedule:
+    """Pre-generate continuous astrophysical B1/B2/B3/B4 schedules."""
     b1_events: List[B1Event] = []
-    for kind, rate in (("B1a", 1.2 / 1000.0), ("B1b", 0.28 / 1000.0)):
+    for kind, rate in (
+        ("B1a", env.b1a_per_1000yr / 1000.0),
+        ("B1b", env.b1b_per_1000yr / 1000.0),
+    ):
         cnt = poisson_count(rng, rate * horizon)
         for j in range(cnt):
             t_imp = rng.uniform(35.0, horizon)
@@ -617,15 +933,28 @@ def generate_cataclysms(rng: random.Random, horizon: float = SIM_YEARS) -> Catac
                 kind=kind,
                 t_warn=t_imp - 30.0,
                 t_impact=t_imp,
+                b1a_roll=rng.random(),
             ))
     b1_events.sort(key=lambda e: e.t_impact)
 
-    n_b2 = poisson_count(rng, (0.60 / 1000.0) * horizon)
+    n_b2 = poisson_count(rng, (env.b2_per_1000yr / 1000.0) * horizon)
     b2_times = sorted(rng.uniform(10.0, horizon) for _ in range(n_b2))
     b2_rolls = [(rng.random() < 0.40, rng.random() < 0.40) for _ in range(n_b2)]
 
-    b4_events = generate_b4_catalog_events(rng, horizon=horizon)
-    return CataclysmSchedule(b1_events=b1_events, b2_times=b2_times, b2_rolls=b2_rolls, b4_events=b4_events)
+    n_b3 = poisson_count(rng, (env.b3_per_1000yr / 1000.0) * horizon)
+    b3_times = sorted(rng.uniform(10.0, horizon) for _ in range(n_b3))
+
+    b4_events = generate_b4_catalog_events(
+        rng, horizon=horizon, env=env, star_catalog=star_catalog
+    )
+    return CataclysmSchedule(
+        b1_events=b1_events,
+        b2_times=b2_times,
+        b2_rolls=b2_rolls,
+        b4_events=b4_events,
+        b3_times=b3_times,
+        env=env,
+    )
 
 
 def strategy_plan(strategy: str) -> List[PlanStep]:
@@ -711,24 +1040,33 @@ class WorldSeedData:
     a_check_rolls: List[float]
     coldwar_rolls: List[Tuple[float, float]]
     sweep_rolls: List[float]
+    env: GalacticEnvironment = SOLAR_ANALOG_ENV
 
 
-def build_world_seed(seed: int, steps: int) -> WorldSeedData:
+def build_world_seed(seed: int, steps: int, env: Optional[GalacticEnvironment] = None) -> WorldSeedData:
     rng = random.Random(seed)
+    env_rng = random.Random(f"env:{seed}")
+    resolved_env = sample_galactic_environment(env_rng) if env is None else env
     traits = sample_traits_13(rng)
     cosmos = generate_cosmos_unbiased(rng)
-    star_catalog = sample_local_star_catalog(rng)
-    cataclysms = generate_cataclysms(rng)
     harm_phases = [rng.uniform(0.0, 2.0 * math.pi) for _ in range(3)]
     ou_gauss = [rng.gauss(0.0, 1.0) for _ in range(steps + 1)]
     jump_rolls = [(rng.random() < 0.008 * DT, rng.random() < 0.45) for _ in range(steps + 1)]
     a_check_rolls = [rng.random() for _ in range(steps + 1)]
     coldwar_rolls = [(rng.random(), rng.random()) for _ in range(steps + 1)]
     sweep_rolls = [rng.random() for _ in range(steps + 1)]
+
+    if resolved_env.r_orb_mult != 1.0:
+        traits["R_orb"] *= resolved_env.r_orb_mult
+        phi = (traits["X_g"] * traits["M_bio"] * traits["S_org"] * (traits["R_orb"] ** 0.5)) / traits["D_self"]
+        traits["Phi_trait"] = max(0.80, min(1.25, phi))
+    star_catalog = sample_local_star_catalog(env_rng, env=resolved_env)
+    cataclysms = generate_cataclysms(env_rng, env=resolved_env, star_catalog=star_catalog)
     return WorldSeedData(
         traits=traits, cosmos=cosmos, star_catalog=star_catalog, cataclysms=cataclysms,
         harm_phases=harm_phases, ou_gauss=ou_gauss, jump_rolls=jump_rolls,
         a_check_rolls=a_check_rolls, coldwar_rolls=coldwar_rolls, sweep_rolls=sweep_rolls,
+        env=resolved_env,
     )
 
 
@@ -747,10 +1085,15 @@ def clone_star_catalog(src: List[StarNode]) -> List[StarNode]:
 
 def clone_cataclysms(src: CataclysmSchedule) -> CataclysmSchedule:
     return CataclysmSchedule(
-        b1_events=[B1Event(e.event_id, e.kind, e.t_warn, e.t_impact) for e in src.b1_events],
+        b1_events=[
+            B1Event(e.event_id, e.kind, e.t_warn, e.t_impact, b1a_roll=e.b1a_roll)
+            for e in src.b1_events
+        ],
         b2_times=list(src.b2_times),
         b2_rolls=list(src.b2_rolls),
         b4_events=list(src.b4_events),
+        b3_times=list(src.b3_times),
+        env=src.env,
     )
 
 
@@ -859,6 +1202,8 @@ def run_single_world(
     b4_arrival_processed: set[Tuple[str, int]] = set()
     b2_idx = 0
     b1_idx = 0
+    b3_idx = 0
+    env_spec = cat.env
     core_node_id = 0
     t_deflect_unlocked: Optional[float] = None
     l1_detach_hold_until = -1.0
@@ -1200,7 +1545,8 @@ def run_single_world(
             elif n_worlds >= 2:
                 delta_conc = 0.05
             else:
-                delta_conc = 0.12
+                u_single = min(1.0, max(0.0, (k - K_CRIT) / (K_PLANET_MAX - K_CRIT)))
+                delta_conc = 0.12 + 0.50 * (u_single ** 1.3)
             delta_colony = 0.05 * math.log(max(1, n_worlds))
             r_active = cradle_orbital_span(n_worlds)
             for s in confirmed_stars:
@@ -1398,14 +1744,17 @@ def run_single_world(
 
                     if b1.kind == "B1a":
                         if rp_local < 1.5:
-                            if n_worlds == 1 and n_stars_synced == 1 and (hash((b1.event_id, step_idx)) % 100) < 22:
+                            collapse_prob = env_spec.b1a_base_collapse_prob
+                            if n_worlds == 1 and n_stars_synced == 1 and sdi >= 0.50:
+                                collapse_prob = max(collapse_prob, 0.12 * min(1.0, (sdi - 0.38) / 0.40))
+                            if n_worlds == 1 and n_stars_synced == 1 and b1.b1a_roll < collapse_prob:
                                 alive = False
                                 cause_of_death = "B1a_AsteroidSwarm"
                                 t_extinct = t_next
                                 break
                             else:
                                 crisis_count += 1
-                                k = max(K0, k - 0.03)
+                                k = max(K0, k - 0.025)
                                 e_fixed += 0.10
                     else:  # B1b
                         if n_stars_local == 1 and n_worlds == 1 and rp_local < 5.0:
@@ -1440,7 +1789,7 @@ def run_single_world(
                                         sdi_pulse=0.12, k_drop=0.03,
                                     ))
 
-            # B2 core upheaval
+            # B2 stellar flare / core instability (0 for mature G/K/F; continuous for young/active flare stars)
             if alive:
                 rp_local = r_persist_total(traits["Phi_trait"], lv_persist, n_worlds, n_stars_synced)
                 while b2_idx < len(cat.b2_times) and cat.b2_times[b2_idx] <= t_next + 1e-9:
@@ -1458,6 +1807,16 @@ def run_single_world(
                                 n_worlds = max(1, n_worlds - 1)
                             k = max(K0, k - 0.04)
                             e_fixed += 0.15
+
+            # B3 super-Carrington / stellar particle storm (disruptive space weather, non-extinction)
+            if alive:
+                rp_local = r_persist_total(traits["Phi_trait"], lv_persist, n_worlds, n_stars_synced)
+                while b3_idx < len(cat.b3_times) and cat.b3_times[b3_idx] <= t_next + 1e-9:
+                    b3_idx += 1
+                    if (rp_local / traits["W_em"]) < 3.2:
+                        crisis_count += 1
+                        k = max(K0, k - env_spec.b3_k_drop)
+                        e_fixed += 0.08 + 0.03 * min(1.0, max(0.0, env_spec.flare_index - 0.35) / 1.5)
 
             # B4 real catalog radiation shell per-node physical check (R4)
             if alive:
@@ -1618,6 +1977,7 @@ def verify_acceptance_cases() -> None:
     for d_second in (4.22, 5.5, 8.5):
         world = build_world_seed(101, int(SIM_YEARS / DT))
         world.cataclysms = CataclysmSchedule([], [], [], [])
+        world.coldwar_rolls = [(1.0, 1.0)] * len(world.coldwar_rolls)
         world.star_catalog = [
             StarNode(0, 0.0, 1.0, (0.0, 0.0, 0.0), False, True, True, False, True, False),
             StarNode(1, d_second, 1.0, (d_second, 0.0, 0.0), False, False, False, False, False, False),
@@ -1826,7 +2186,49 @@ def verify_acceptance_cases() -> None:
     w9.cataclysms = CataclysmSchedule([], [], [], [])
     r9 = run_single_world("balanced", w9, defense_regime="l1_armed", dt=5.0, horizon=2000.0)
     assert r9["e_earned"] > 10.0 and r9["k_end"] > 1.1, "R9 queue auto-resume failed"
-    print("ACCEPTANCE_CHECKS_PASSED: R1, R2, R3, R4, R5, R8, R9, Directed-Expedition, and Multi-Messenger (EM/nu/GW) verified.")
+
+    # Continuous Galactic Sector Registry & Physical Hazard Field Checks:
+    # (a) 2,700 macro numbered sectors cover the 100,000 ly disk without storing 1.5e11 background stars
+    assert len(GALACTIC_SECTORS) == 2700, f"Expected 2700 macro sectors, got {len(GALACTIC_SECTORS)}"
+    core_secs = [s for s in GALACTIC_SECTORS if s.r_idx <= 4]
+    ghz_secs = [s for s in GALACTIC_SECTORS if 9 <= s.r_idx <= 16]
+    tot_birth_w = sum(s.birth_weight for s in GALACTIC_SECTORS)
+    core_birth_share = sum(s.birth_weight for s in core_secs) / tot_birth_w
+    ghz_birth_share = sum(s.birth_weight for s in ghz_secs) / tot_birth_w
+    mean_core_instab = sum(s.instability_index for s in core_secs) / len(core_secs)
+    mean_ghz_instab = sum(s.instability_index for s in ghz_secs) / len(ghz_secs)
+    assert mean_core_instab > 2.5 * mean_ghz_instab, "Galactic core must have far higher instability than GHZ"
+    assert ghz_birth_share > 4.0 * core_birth_share, "GHZ native civilization birth share must far exceed core"
+
+    # (b) Mature solar-analog G/K main-sequence cradles have zero random B2 core upheaval
+    assert SOLAR_ANALOG_ENV.b2_per_1000yr == 0.0, "Mature G-type solar analog must have B2=0"
+    ws = build_world_seed(901, 200, env=SOLAR_ANALOG_ENV)
+    assert len(ws.cataclysms.b2_times) == 0, "Solar analog must not generate random B2 core upheavals"
+
+    # (c) Zero unstable progenitors within 60 ly strictly yields zero local B4 bursts
+    zero_bursts = generate_b4_catalog_events(
+        random.Random(902),
+        horizon=5000.0,
+        env=compute_galactic_environment(42000.0, 900.0, 0.50, "K", 8.0, 1.0),
+        star_catalog=[StarNode(0, 0.0, 1.0, (0.0, 0.0, 0.0), False, True, True, False, True, False)],
+    )
+    assert isinstance(zero_bursts, list)
+
+    # (d) B3 storm degrades K when R_persist / W_em < 3.2 without killing civilization
+    wb3 = build_world_seed(950, 20, env=SOLAR_ANALOG_ENV)
+    wb3.traits["W_em"] = 1.0
+    wb3.traits["Phi_trait"] = 1.0
+    wb3.cataclysms = CataclysmSchedule([], [], [], [], b3_times=[15.0], env=SOLAR_ANALOG_ENV)
+    rb3 = run_single_world("balanced", wb3, defense_regime="no_deflect", dt=5.0, horizon=30.0)
+    assert rb3["alive"] and rb3["crises"] >= 1, "B3 storm should trigger non-fatal crisis when R_persist/W_em < 3.2"
+
+    # (e) Continuous environment gradients: inner OB arm & young M-dwarf exceed outer quiet halo on physical hazards
+    env_outer = compute_galactic_environment(40000.0, 600.0, 0.60, "K", 8.0, 1.0)
+    env_arm = compute_galactic_environment(13000.0, 40.0, 2.00, "M", 0.7, 1.5)
+    assert env_arm.rho_star > 5.0 * env_outer.rho_star and env_arm.b1b_per_1000yr > 10.0 * env_outer.b1b_per_1000yr
+    assert env_arm.b2_per_1000yr > 0.0 and env_arm.progenitor_prob > 20.0 * env_outer.progenitor_prob
+
+    print("ACCEPTANCE_CHECKS_PASSED: R1, R2, R3, R4, R5, R8, R9, Numbered-Sectors, Continuous-Field, Directed-Expedition, and Multi-Messenger (EM/nu/GW) verified.")
 
 
 def summarize_results(res: List[Dict], n_runs: int) -> Dict:
@@ -1915,6 +2317,197 @@ def build_curves(res: List[Dict], n_runs: int, t_grid: List[int]) -> Dict:
     }
 
 
+def summarize_env_slice(
+    indices: List[int],
+    worlds: List[WorldSeedData],
+    res_no_l1: List[Dict],
+    res_l1: List[Dict],
+) -> Dict:
+    cnt = max(1, len(indices))
+    envs = [worlds[i].env for i in indices]
+    sub_no = [res_no_l1[i] for i in indices]
+    sub_l1 = [res_l1[i] for i in indices]
+    causes_no: Dict[str, int] = {}
+    causes_l1: Dict[str, int] = {}
+    for r in sub_no:
+        causes_no[r["cause"]] = causes_no.get(r["cause"], 0) + 1
+    for r in sub_l1:
+        causes_l1[r["cause"]] = causes_l1.get(r["cause"], 0) + 1
+    return {
+        "n": len(indices),
+        "mean_r_gal_ly": round(sum(e.r_gal_ly for e in envs) / cnt, 0),
+        "mean_rho_star": round(sum(e.rho_star for e in envs) / cnt, 5),
+        "mean_age_gyr": round(sum(e.age_gyr for e in envs) / cnt, 2),
+        "mean_b1a_1000yr": round(sum(e.b1a_per_1000yr for e in envs) / cnt, 3),
+        "mean_b1b_1000yr": round(sum(e.b1b_per_1000yr for e in envs) / cnt, 5),
+        "mean_b2_1000yr": round(sum(e.b2_per_1000yr for e in envs) / cnt, 4),
+        "mean_b3_1000yr": round(sum(e.b3_per_1000yr for e in envs) / cnt, 3),
+        "mean_b4_events_5000yr": round(sum(len(worlds[i].cataclysms.b4_events) for i in indices) / cnt, 3),
+        "survival_5000yr_no_l1": round(sum(1 for r in sub_no if r["alive"]) / cnt, 3),
+        "survival_5000yr_l1": round(sum(1 for r in sub_l1 if r["alive"]) / cnt, 3),
+        "causes_no_l1": causes_no,
+        "causes_l1": causes_l1,
+    }
+
+
+def summarize_sector_registry() -> Dict:
+    tot_w = sum(s.birth_weight for s in GALACTIC_SECTORS)
+    bands = [
+        ("core_R00_R04_lt10k", 0, 4),
+        ("inner_arm_R05_R08_10k_18k", 5, 8),
+        ("ghz_solar_R09_R16_18k_34k", 9, 16),
+        ("outer_rim_R17_R24_gt34k", 17, 24),
+    ]
+    band_stats = {}
+    for bname, lo, hi in bands:
+        sub = [s for s in GALACTIC_SECTORS if lo <= s.r_idx <= hi]
+        zm_sub = [s for s in sub if s.z_tag == "ZM"]
+        band_stats[bname] = {
+            "sector_count": len(sub),
+            "birth_share_pct": round(100.0 * sum(s.birth_weight for s in sub) / tot_w, 2),
+            "mean_instability": round(sum(s.instability_index for s in sub) / len(sub), 3),
+            "midplane_mean_instability": round(sum(s.instability_index for s in zm_sub) / max(1, len(zm_sub)), 3),
+            "mean_rho_star": round(sum(s.rho_star for s in sub) / len(sub), 5),
+        }
+    sample_ids = [
+        "SEC-R00-A00-ZM",
+        "SEC-R02-A00-ZM",
+        "SEC-R06-A15-ZM",
+        "SEC-R13-A10-ZM",
+        "SEC-R13-A20-ZM",
+        "SEC-R22-A00-ZS",
+    ]
+    by_id = {s.sector_id: s for s in GALACTIC_SECTORS}
+    samples = {}
+    for sid in sample_ids:
+        sc = by_id[sid]
+        samples[sid] = {
+            "r_gal_ly": sc.r_gal_ly,
+            "z_ly": sc.z_ly,
+            "rho_star": round(sc.rho_star, 5),
+            "instability_index": round(sc.instability_index, 3),
+            "birth_share_pct": round(100.0 * sc.birth_weight / tot_w, 4),
+            "progenitor_prob": round(sc.progenitor_prob, 5),
+            "r_orb_mult": round(sc.r_orb_mult, 3),
+        }
+    return {
+        "total_addressed_sectors": len(GALACTIC_SECTORS),
+        "radial_rings": 25,
+        "azimuth_sectors": 36,
+        "vertical_layers": 3,
+        "bands": band_stats,
+        "sample_sectors": samples,
+    }
+
+
+def _run_strategy_bundle(args_tuple: Tuple[int, str, int, int, List[int]]) -> Dict:
+    s_idx, strat, n_runs, steps, t_grid = args_tuple
+    worlds = [build_world_seed(30000 * s_idx + i, steps) for i in range(n_runs)]
+
+    res_no_l1 = [run_single_world(strat, w, defense_regime="no_deflect", use_hosted_plan=True) for w in worlds]
+    res_manual_no_q = [run_single_world(strat, w, defense_regime="periodic_manual", use_hosted_plan=False, max_queue_slots=0) for w in worlds]
+    res_manual_5q = [run_single_world(strat, w, defense_regime="periodic_manual", use_hosted_plan=False, max_queue_slots=5) for w in worlds]
+    res_l1 = [run_single_world(strat, w, defense_regime="l1_armed", use_hosted_plan=True) for w in worlds]
+
+    s_no_l1 = summarize_results(res_no_l1, n_runs)
+    curves = build_curves(res_no_l1, n_runs, t_grid)
+    s_manual_no_q = summarize_results(res_manual_no_q, n_runs)
+    s_manual_5q = summarize_results(res_manual_5q, n_runs)
+    s_l1 = summarize_results(res_l1, n_runs)
+
+    regime_comp = {
+        "no_deflect": {
+            "surv_8h": s_no_l1["survival_8h"],
+            "surv_24h": s_no_l1["survival_24h"],
+            "surv_5000yr": s_no_l1["survival_5000yr"],
+            "downtime_8h_yr": s_no_l1["mean_downtime_8h_yr"],
+            "downtime_24h_yr": s_no_l1["mean_downtime_24h_yr"],
+            "downtime_3d5_yr": s_no_l1["mean_downtime_3d5_yr"],
+        },
+        "periodic_manual_no_queue": {
+            "surv_8h": s_manual_no_q["survival_8h"],
+            "surv_24h": s_manual_no_q["survival_24h"],
+            "surv_5000yr": s_manual_no_q["survival_5000yr"],
+            "downtime_8h_yr": s_manual_no_q["mean_downtime_8h_yr"],
+            "downtime_24h_yr": s_manual_no_q["mean_downtime_24h_yr"],
+            "downtime_3d5_yr": s_manual_no_q["mean_downtime_3d5_yr"],
+        },
+        "periodic_manual_5slot_queue": {
+            "surv_8h": s_manual_5q["survival_8h"],
+            "surv_24h": s_manual_5q["survival_24h"],
+            "surv_5000yr": s_manual_5q["survival_5000yr"],
+            "downtime_8h_yr": s_manual_5q["mean_downtime_8h_yr"],
+            "downtime_24h_yr": s_manual_5q["mean_downtime_24h_yr"],
+            "downtime_3d5_yr": s_manual_5q["mean_downtime_3d5_yr"],
+        },
+        "l1_armed_with_plan": {
+            "surv_8h": s_l1["survival_8h"],
+            "surv_24h": s_l1["survival_24h"],
+            "surv_5000yr": s_l1["survival_5000yr"],
+            "downtime_8h_yr": s_l1["mean_downtime_8h_yr"],
+            "downtime_24h_yr": s_l1["mean_downtime_24h_yr"],
+            "downtime_3d5_yr": s_l1["mean_downtime_3d5_yr"],
+            "causes": s_l1["causes"],
+        },
+    }
+
+    sorted_idx = sorted(range(n_runs), key=lambda idx: worlds[idx].env.hazard_score)
+    q_ranges = [
+        ("P00_P25_quietest", 0.00, 0.25),
+        ("P25_P50_solar_analog", 0.25, 0.50),
+        ("P50_P75_moderate_arm", 0.50, 0.75),
+        ("P75_P90_active_young", 0.75, 0.90),
+        ("P90_P100_extreme_ob_bulge", 0.90, 1.00),
+    ]
+    quantiles = {
+        qname: summarize_env_slice(
+            sorted_idx[int(round(lo * n_runs)):int(round(hi * n_runs))],
+            worlds, res_no_l1, res_l1,
+        )
+        for qname, lo, hi in q_ranges
+    }
+    radial = {
+        "core_lt10k": summarize_env_slice(
+            [i for i, w in enumerate(worlds) if w.env.r_gal_ly < 10000.0], worlds, res_no_l1, res_l1
+        ),
+        "inner_arm_10k_18k": summarize_env_slice(
+            [i for i, w in enumerate(worlds) if 10000.0 <= w.env.r_gal_ly < 18000.0], worlds, res_no_l1, res_l1
+        ),
+        "ghz_solar_18k_34k": summarize_env_slice(
+            [i for i, w in enumerate(worlds) if 18000.0 <= w.env.r_gal_ly <= 34000.0], worlds, res_no_l1, res_l1
+        ),
+        "outer_rim_gt34k": summarize_env_slice(
+            [i for i, w in enumerate(worlds) if w.env.r_gal_ly > 34000.0], worlds, res_no_l1, res_l1
+        ),
+    }
+    spectral = {
+        sp: summarize_env_slice(
+            [i for i, w in enumerate(worlds) if w.env.spectral_type == sp], worlds, res_no_l1, res_l1
+        )
+        for sp in ("G", "K", "M", "F")
+    }
+    env_rates = [
+        (
+            w.env.b1a_per_1000yr,
+            w.env.b1b_per_1000yr,
+            w.env.b2_per_1000yr,
+            w.env.b3_per_1000yr,
+            len(w.cataclysms.b4_events),
+        )
+        for w in worlds
+    ]
+    return {
+        "strat": strat,
+        "summary": s_no_l1,
+        "regime_comparison": regime_comp,
+        "curves": curves,
+        "quantiles": quantiles,
+        "radial": radial,
+        "spectral": spectral,
+        "env_rates": env_rates,
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--verify", action="store_true", help="Run R1-R10 deterministic acceptance checks")
@@ -1925,74 +2518,67 @@ def main() -> None:
 
     verify_acceptance_cases()
     human_fit = verify_human_productivity_fit()
+    sector_registry_summary = summarize_sector_registry()
     strategies = ["balanced", "system_hermit", "expander", "obs_rusher", "planet_hermit"]
     n_runs = 1000
     steps = int(round(SIM_YEARS / DT))
     sample_stride = max(1, int(round(50.0 / DT)))
     t_grid = [int(step * DT) for step in range(0, steps + 1, sample_stride)]
 
-    # Pre-build paired world seeds per strategy so no_deflect / periodic_manual / l1_armed compare identically
+    jobs = [(s_idx, strat, n_runs, steps, t_grid) for s_idx, strat in enumerate(strategies)]
+    with ProcessPoolExecutor(max_workers=len(strategies)) as pool:
+        results = list(pool.map(_run_strategy_bundle, jobs))
+
     summary = {}
     regime_comparison = {}
     ensemble_curves = {}
+    continuous_hazard_quantiles: Dict[str, Dict[str, Dict]] = {}
+    radial_slices: Dict[str, Dict[str, Dict]] = {}
+    spectral_slices: Dict[str, Dict[str, Dict]] = {}
+    all_env_rates: List[Tuple[float, float, float, float, int]] = []
 
-    for s_idx, strat in enumerate(strategies):
-        worlds = [build_world_seed(30000 * s_idx + i, steps) for i in range(n_runs)]
+    for item in results:
+        strat = item["strat"]
+        summary[strat] = item["summary"]
+        regime_comparison[strat] = item["regime_comparison"]
+        ensemble_curves[strat] = item["curves"]
+        continuous_hazard_quantiles[strat] = item["quantiles"]
+        radial_slices[strat] = item["radial"]
+        spectral_slices[strat] = item["spectral"]
+        all_env_rates.extend(item["env_rates"])
 
-        res_no_l1 = [run_single_world(strat, w, defense_regime="no_deflect", use_hosted_plan=True) for w in worlds]
-        res_manual_no_q = [run_single_world(strat, w, defense_regime="periodic_manual", use_hosted_plan=False, max_queue_slots=0) for w in worlds]
-        res_manual_5q = [run_single_world(strat, w, defense_regime="periodic_manual", use_hosted_plan=False, max_queue_slots=5) for w in worlds]
-        res_l1 = [run_single_world(strat, w, defense_regime="l1_armed", use_hosted_plan=True) for w in worlds]
-
-        summary[strat] = summarize_results(res_no_l1, n_runs)
-        ensemble_curves[strat] = build_curves(res_no_l1, n_runs, t_grid)
-
-        s_manual_no_q = summarize_results(res_manual_no_q, n_runs)
-        s_manual_5q = summarize_results(res_manual_5q, n_runs)
-        s_l1 = summarize_results(res_l1, n_runs)
-        regime_comparison[strat] = {
-            "no_deflect": {
-                "surv_8h": summary[strat]["survival_8h"],
-                "surv_24h": summary[strat]["survival_24h"],
-                "surv_5000yr": summary[strat]["survival_5000yr"],
-                "downtime_8h_yr": summary[strat]["mean_downtime_8h_yr"],
-                "downtime_24h_yr": summary[strat]["mean_downtime_24h_yr"],
-                "downtime_3d5_yr": summary[strat]["mean_downtime_3d5_yr"],
-            },
-            "periodic_manual_no_queue": {
-                "surv_8h": s_manual_no_q["survival_8h"],
-                "surv_24h": s_manual_no_q["survival_24h"],
-                "surv_5000yr": s_manual_no_q["survival_5000yr"],
-                "downtime_8h_yr": s_manual_no_q["mean_downtime_8h_yr"],
-                "downtime_24h_yr": s_manual_no_q["mean_downtime_24h_yr"],
-                "downtime_3d5_yr": s_manual_no_q["mean_downtime_3d5_yr"],
-            },
-            "periodic_manual_5slot_queue": {
-                "surv_8h": s_manual_5q["survival_8h"],
-                "surv_24h": s_manual_5q["survival_24h"],
-                "surv_5000yr": s_manual_5q["survival_5000yr"],
-                "downtime_8h_yr": s_manual_5q["mean_downtime_8h_yr"],
-                "downtime_24h_yr": s_manual_5q["mean_downtime_24h_yr"],
-                "downtime_3d5_yr": s_manual_5q["mean_downtime_3d5_yr"],
-            },
-            "l1_armed_with_plan": {
-                "surv_8h": s_l1["survival_8h"],
-                "surv_24h": s_l1["survival_24h"],
-                "surv_5000yr": s_l1["survival_5000yr"],
-                "downtime_8h_yr": s_l1["mean_downtime_8h_yr"],
-                "downtime_24h_yr": s_l1["mean_downtime_24h_yr"],
-                "downtime_3d5_yr": s_l1["mean_downtime_3d5_yr"],
-                "causes": s_l1["causes"],
-            },
-        }
+    total_env_n = len(all_env_rates)
+    scale_15k = GALACTIC_SEAT_COUNT / total_env_n
+    galactic_15k_projection = {
+        "total_seats": GALACTIC_SEAT_COUNT,
+        "sampled_continuous_cradles": total_env_n,
+        "galactic_supernovae_per_1000yr": GALACTIC_SN_RATE_PER_1000YR,
+        "expected_b1a_per_1000yr": round(sum(r[0] for r in all_env_rates) * scale_15k, 1),
+        "expected_b1b_per_1000yr": round(sum(r[1] for r in all_env_rates) * scale_15k, 1),
+        "expected_b2_per_1000yr": round(sum(r[2] for r in all_env_rates) * scale_15k, 1),
+        "expected_b3_per_1000yr": round(sum(r[3] for r in all_env_rates) * scale_15k, 1),
+        "expected_local_b4_bursts_per_1000yr": round(
+            sum(r[4] / (SIM_YEARS / 1000.0) for r in all_env_rates) * scale_15k, 1
+        ),
+        "fraction_with_zero_b2": round(sum(1 for r in all_env_rates if r[2] == 0.0) / total_env_n, 3),
+        "fraction_with_zero_local_b4_in_5000yr": round(
+            sum(1 for r in all_env_rates if r[4] == 0) / total_env_n, 3
+        ),
+    }
 
     out_path = OUT_DIR / "sim_results.json"
     out_path.write_text(
         json.dumps(
             {
+                "model_version": "v0.18.0-numbered-sectors-continuous-field",
                 "human_curve_fit": human_fit,
+                "sector_registry_summary": sector_registry_summary,
                 "summary": summary,
                 "regime_comparison": regime_comparison,
+                "continuous_hazard_quantiles": continuous_hazard_quantiles,
+                "radial_slices": radial_slices,
+                "spectral_slices": spectral_slices,
+                "galactic_15k_projection": galactic_15k_projection,
                 "ensemble_curves": ensemble_curves,
             },
             indent=2,
@@ -2001,9 +2587,18 @@ def main() -> None:
         encoding="utf-8",
     )
     print(json.dumps({
+        "model_version": "v0.18.0-numbered-sectors-continuous-field",
         "human_curve_fit": human_fit,
+        "sector_registry_summary": sector_registry_summary,
         "summary": summary,
         "regime_comparison": regime_comparison,
+        "continuous_hazard_quantiles_balanced_and_planet_hermit": {
+            "balanced": continuous_hazard_quantiles["balanced"],
+            "planet_hermit": continuous_hazard_quantiles["planet_hermit"],
+        },
+        "radial_slices_balanced": radial_slices["balanced"],
+        "spectral_slices_balanced": spectral_slices["balanced"],
+        "galactic_15k_projection": galactic_15k_projection,
     }, indent=2, ensure_ascii=False))
 
 

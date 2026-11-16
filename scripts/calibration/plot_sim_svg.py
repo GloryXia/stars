@@ -57,12 +57,11 @@ def main() -> None:
         '</style>',
         '</defs>',
         f'<rect width="{W}" height="{H}" fill="#0B1018"/>',
-        '<text x="75" y="34" class="title">Beyond the Light Cone (GDD v0.17.0) — 5-Strategy Monte Carlo Ensemble (N = 1,000 / strategy, Unattended No-L1)</text>',
+        '<text x="75" y="34" class="title">Beyond the Light Cone (v0.18.0) — 5-Strategy Continuous Galactic Ensemble (N = 1,000 / strategy, Unattended No-L1)</text>',
         (
             f'<text x="75" y="54" class="subtitle">'
-            f'Human Curve Fit R2_log = {fit["r2_log"]:.4f} | '
-            f'Exponential Productivity + Stochastic Superposition -> Continuous Point Rate v_E(t) | '
-            f'Upgrade Costs 1 / 2 / 4 / 8 pts'
+            f'2,700 Numbered Sectors (GHZ Birth Weight + Instability Index) | Human Curve Fit R2_log = {fit["r2_log"]:.4f} | '
+            f'Single-Planet Biosphere Bottleneck + Realistic Astrophysical Hazards'
             f'</text>'
         ),
     ]
@@ -88,7 +87,7 @@ def main() -> None:
         ("C. Mean Point Accrual Speed  v_E(t)  [pts / 100 sim yr]", 75, 474, 455, 260, 0.0, 3.0, "", "mean_v_e"),
         ("D. Mean Cumulative Earned Points  E_cum(t)", 625, 474, 455, 260, 0.0, 100.0, " pts", "mean_e_cum"),
         ("E. Mean Systemic Fragility  SDI(t)", 75, 814, 455, 260, 0.0, 100.0, "%", "mean_sdi"),
-        ("F. Multi-Messenger Neighbor Lock Rate  P(Lock)", 625, 814, 455, 260, 0.0, 60.0, "%", "lock_pct"),
+        ("F. Multi-Messenger Neighbor Lock Rate  P(Lock)", 625, 814, 455, 260, 0.0, 80.0, "%", "lock_pct"),
     ]
 
     y_ticks_map = {
@@ -97,7 +96,7 @@ def main() -> None:
         "mean_v_e": [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0],
         "mean_e_cum": [0, 25, 50, 75, 100],
         "mean_sdi": [0, 20, 40, 60, 80, 100],
-        "lock_pct": [0, 15, 30, 45, 60],
+        "lock_pct": [0, 20, 40, 60, 80],
     }
 
     for title, px, py, pw, ph, ymin, ymax, unit, field in panels:
@@ -146,17 +145,17 @@ def main() -> None:
         if field == "surv_pct":
             regimes = data.get("regime_comparison", {})
             annots = [
-                ("balanced", "Balanced", 62, "#4CF2A0"),
-                ("system_hermit", "System Hermit", 112, "#38BDF8"),
-                ("expander", "Expander", 150, "#F59E0B"),
-                ("obs_rusher", "Obs-Rusher", 188, "#C084FC"),
-                ("planet_hermit", "Planet Hermit", 232, "#F43F5E"),
+                ("system_hermit", "System Hermit", 24, "#38BDF8"),
+                ("balanced", "Balanced", 50, "#4CF2A0"),
+                ("expander", "Expander", 100, "#F59E0B"),
+                ("planet_hermit", "Planet Hermit", 160, "#F43F5E"),
+                ("obs_rusher", "Obs-Rusher", 228, "#C084FC"),
             ]
             for s_key, s_name, y_off, col in annots:
                 s_no_l1 = summary[s_key]["survival_5000yr"] * 100.0
                 s_l1 = regimes.get(s_key, {}).get("l1_armed_with_plan", {}).get("surv_5000yr")
                 l1_txt = f" (L1: {s_l1 * 100.0:.1f}%)" if s_l1 is not None else ""
-                x_off = px + 258
+                x_off = px + 265 if s_key == "planet_hermit" else px + 240
                 svg.append(f'<text x="{x_off}" y="{py + y_off}" class="note" style="fill:{col}">{s_name}: {s_no_l1:.1f}%{l1_txt}</text>')
         elif field == "mean_v_e":
             svg.append(f'<text x="{px + 12}" y="{py + 20}" class="note">Ensemble mean of +/-65% OU, harmonic &amp; jump ripples</text>')
@@ -169,7 +168,7 @@ def main() -> None:
 
     svg.append(
         f'<text x="75" y="{H - 22}" class="note">'
-        f'Sim Engine: scripts/calibration/sim_civ_dynamics.py (GDD v0.17.0, multi-messenger EM/nu/GW + directed 0.10c expeditions) | Horizon 5,000 sim yr | dt = 5y'
+        f'Sim Engine: scripts/calibration/sim_civ_dynamics.py (2,700 Numbered Galactic Sectors + Continuous Physical Hazards, EM/nu/GW + 0.10c Expeditions) | 5,000 sim yr | dt = 5y'
         f'</text>'
     )
     svg.append('</svg>')
