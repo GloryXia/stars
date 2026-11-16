@@ -28,7 +28,7 @@ flowchart LR
 | **移动端辅端（iOS / Android）** | Capacitor（复用 Web 工程构建产物 + 系统 Haptics / 安全区 / App-Switch PKCE 插件） | 辅端交付渠道；iOS 端在提供 Google 登录的同时按 App Store Guideline 4.8 预留 `Sign in with Apple` OIDC 对等槽位，与 Web 端账号体系互通。 |
 | **海外边缘与鉴权** | Overseas Cloud + Global CDN + Anycast WSS + Google OAuth 2.0 / OIDC | 脱离微信小程序／小游戏与内地 ICP／白名单体系；采用海外域名、TLS 1.3、`httpOnly` 会话 Cookie + WSS 短期票据，无微信运行时依赖。 |
 | **万级单图仿真集群** | TypeScript / Node.js Worker Threads 或 Rust / Go 高吞吐分片算核（M1–M2 先用 TS `sim-core` 统一参考语义） | 按三维星图八叉树将万级席位切分至多台扇区计算节点；相邻分片借助物理最大作用视界与 $c$ 有限光速建立**因果前瞻幽灵带（$\Delta t_{\text{lookahead}}=L_{\text{ghost}}/c$）**，保证分片结算与全图单线程参考结果逐比特一致。 |
-| **星表与稀疏增量存储** | 确定性种子星表生成器 + PostgreSQL（稀疏增量与快照） + Redis（扇区路由与热缓存） | 银河 $\sim 1.5\times 10^{11}$ 级恒星底图不落全库，仅以细胞哈希按需生成；数据库与 WAL 仅持久化文明态、被占/修改/毁伤节点与既建信标设施（Sparse Delta Overlay）、在途波前与事件提交水位。 |
+| **星表与稀疏增量存储** | 2,700 扇区宏观编号注册表（`SEC-Rxx-Axx-Zx`）+ 确定性子细胞星表生成器 + PostgreSQL（稀疏增量与快照） + Redis（扇区路由与热缓存） | **不将 $\sim 1.5\times 10^{11}$ 颗恒星落库或常驻内存**：仅常驻 `25×36×3 = 2,700` 个宏观星域编号的物理摘要（恒星密度 $\rho_*$、星域不稳定性指数 $\mathcal{I}_{\text{sec}}$、原生诞生权重 $W_{\text{birth}}$、前身星比例与金属丰度梯度），局部恒星坐标与光谱仅按 `(galaxy_seed, sector_id, subcell_id)` 按需推导即弃；数据库与 WAL 仅持久化文明态、被占/修改/毁伤节点与既建信标设施（Sparse Delta Overlay）、在途波前与事件提交水位。 |
 | **离线队列、加点托管、L1 哨兵与预留 Agent 接口** | 服务端 5 槽 `build_queue` + 20 步 `allocation_plan` 托管 + 3 槽确定性白名单 L1 哨兵自动机（M1–M4）；M4+ 可插拔 `external_agent` 网关 | **M1–M4 移除所有大模型运行时与 MCP Server**；以统一 `ActorPrincipal` 与 `SeatCommandEnvelope` 保留离线加点托管、哨兵规则防御与未来扩展面。[席位契约 §4](SEAT-CONTRACT.md#4-l1-离线确定性护航与-m4-外部-agent-扩展边界) |
 
 | 代码目录 | 职责 |
@@ -48,7 +48,7 @@ flowchart LR
 
 | 状态域 | 内容、存储位置及更新条件 |
 | --- | --- |
-| **程序化背景星表** | 由 `(galaxy_seed, octree_cell_id)` 按指数薄盘 + 四主旋臂分布确定性生成的恒星坐标、光谱型与光度权重 $\omega_i$；全客户端与服务端无状态按需计算，只读公开。 |
+| **宏观星域注册表与按需背景星表** | 先由 `(galaxy_seed, sector_id)` 维护 `2,700` 个编号星域（`SEC-R00..R24-A00..A35-ZS/ZM/ZN`）的连续物理底图参数（$\rho_*$、$\mathcal I_{\text{sec}}$ 不稳定性、$W_{\text{birth}}$ 诞生权重、金属丰度与前身星占比）；局域恒星坐标、光谱型、系统年龄与光度权重 $\omega_i$ 再按子细胞哈希无状态按需计算，只读公开。 |
 | **长期运行稀疏世界状态** | **仅存储偏离基准底图的稀疏增量**（Sparse Delta Overlay）：被占据/纳入/毁伤的恒星节点、行星据点数 $N_{\text{worlds}}$、文明包络轨迹段、既建物理引力波信标（`信标 Lv.4`）、灭绝废墟/死域与在途信号/武器；由物理仲裁与分片计算核持有。 |
 | **节点当地状态** | 已部署设备、当地产能/冗余台账、当地已知链路与有效期、已抵达指令、L1 哨兵预授权规则（含 `b1_warning -> deflect_b1`、`vent_sink` 等）及当地观测采样。仅按该恒星系节点自身因果事件序更新。 |
 | **指挥核知识状态** | 已确认受控节点与已确认能力摘要（`k_value`、`k_max_confirmed`、`r_persist`）、`links` 有向链路报告、`pending_frontier_requests`、多历元观测/星历证据、可见 SDI 分项、连续演化点流 `evo_points_avail` / $\Pi(t)$、预设建造队列 `build_queue` 与长线加点托管计划 `allocation_plan`。仅在指挥核当地事件与送达报告后更新，禁止远端物理损毁超光速同步 `k_value` 或资源可用状态。 |
@@ -57,7 +57,7 @@ flowchart LR
 ### 2.1 唯一时间倍率、全速离线队列与排程
 
 - **物理模拟钟（`*_sim_s`）**负责波前传播、恒星自行、相对论载具轨迹、SDI 脉冲/应变衰减（$\tau_{\text{pulse}}=40\ \mathrm{sim\ yr},\,\tau_{\text{lag}}=15\ \mathrm{sim\ yr}$）、人类拟合生产力随机叠加步进（三模态周期 / OU 漂移 / Poisson 跃迁）与热力学积分。内部几何使用 IEEE-754 双精度光年坐标（在 $50{,}000\ \mathrm{ly}$ 处精度优于 $10^{-11}\ \mathrm{ly}$）。
-- **现实操作钟（`*_real_s`）**与物理模拟钟通过**全服唯一锁定倍速 $\kappa_t = 525{,}960$（`1 real min = 1.00 sim yr`，$1\ \mathrm{ly}$ 光行时间 $\equiv 1\ \mathrm{real\ min} = 60\ \mathrm{real\ s}$）**严格换算，负责科技与 `world_up` 施工、冷却、凝视（$\tau_0=2.5\ \mathrm{real\ s}$）、Lv.4 焦点轨重构（`45 real s = 0.75 sim yr`）与热沉窗口。[GDD §3.4](../../DESIGN.md#space-and-geometry) · [GDD §5.2](../../DESIGN.md#traits-and-tech)
+- **现实操作钟（`*_real_s`）**与物理模拟钟通过**全服唯一锁定倍速 $\kappa_t = 525{,}960$（`1 real min = 1.00 sim yr`，$1\ \mathrm{ly}$ 光行时间 $\equiv 1\ \mathrm{real\ min} = 60\ \mathrm{real\ s}$）**严格换算：科技、`world_up` 施工、冷却与热沉窗口等**权威工期锚定 `sim_yr`**，`*_real_s` 只提供人机节奏换算读数；凝视驻留（$\tau_0=2.5\ \mathrm{real\ s}$）与 Lv.4 焦点轨重构（`45 real s = 0.75 sim yr`）为即时仪器阻尼反馈。[GDD §3.4](../../DESIGN.md#space-and-geometry) · [GDD §5.2](../../DESIGN.md#traits-and-tech)
 - **连续演化点积分与全速离线队列／加点托管**：服务端在物理时间步按 $v_E(t)=v_{E0}\,\Pi(t)\,P_{\text{pop}}\,I_{\text{sci}}\,m_{\text{offline}}$（其中在线与离线统一取 **$m_{\text{offline}}=1.00$**）对连续点数 `evo_points_avail` 积分，升级按几何阶梯 `1 / 2 / 4 / 8 pts` 扣除；严格维护 `build_queue`（上限 5 项）与长线 `allocation_plan`（最多 20 步）的 FIFO 状态机（`ready` / `waiting_points` / `waiting_prerequisite`），在前项完工、积分跨过费用门槛、前置（含跨星回执）更新或移除队首时重估并仅扣点一次无缝开工。
 - **事件队列与因果分片一致**：单个算核或扇区分片严格按 `(due_sim_ms, phase_rank, stable_seq)` 出队，到达时刻向上量化至整数模拟毫秒以杜绝早到，几何求交、剂量与指数曲线仍以 IEEE-754 双精度求值。由于真空中物理信号传播严格满足 $|\mathbf v|\le c$，分片边界设置厚度为 $L_{\text{ghost}}$ 的冗余邻区：分片内部可独立安全向前推进 $\Delta t_{\text{safe}} < L_{\text{ghost}}/c$ 而无需等待远区全局锁，边界外发事件通过有序因果邮箱（Causal Mailbox）按 `t_emit_sim_s` 投递；任何跨分片优化在 M3 须与 M1 全图单核参考实现做**逐事件差分等价测试**。
 
@@ -71,8 +71,8 @@ flowchart LR
 | --- | --- |
 | **空间八叉树 → 物理接触** | 按各波段物理消散界限 $R_{\text{diss}}$ 做空间八叉树剪枝；彻底取消“真空球交叠摩擦”，仅当近距共享恒星节点／中继产生真实物理争夺且冲突报告以光速抵达指挥核时，连续收到冲突每满 `10 sim yr` 计入摩擦，双向 `[PING]` 或脱离报告抵达后清零。 |
 | **多信使波壳抵达 → 信噪比 → 星历** | 对以 $1.00c$ 扩散的多信使波壳分别结算：① **电磁波（EM）** 按 $1/r^2\cdot e^{-\kappa r}$、多普勒 $\mathcal D_r^2\mathcal D_e^4$ 与波壳内EM杂波噪底 $N_{\text{local}}(t)$ 积分，跌破宇宙混杂消散门限 $F_{\text{diss,EM}}$ 即彻底消散（开启 `EMCON`/热沉后更早射出的光子继续外传形成**空心波壳**，绝不对虚拟面积施以 $R^2/R_0^2$ 乘子）；② **中微子（$\nu$）** 按 $1/r^2$（$\kappa_\nu\equiv 0$）无视 `heat_sink` / `blackbody_mimic` 与宿主光雾穿透，但在 `Obs Lv.3+` 仅产出 Stage 1 宽角误差锥；③ **引力波（GW）** 感测线性应变 **$h\propto 1/r$**（$\kappa_{\text{GW}}\equiv 0$、不可屏蔽），在 `Obs Lv.3+` 单星/双星仅出宽弧，须 **$\ge 3$ 颗非共线确认恒星三角定标**方可升级精密定位锁定；④ 长基线 $B_\perp$ 取已确认协同节点的真实空间跨度。 |
-| **发射星历 → 在途轨迹 → 毁伤与 B1–B4 天灾** | 发射锚定当时已确认星历及其不确定度；抵达时按真实节点、受照注量（如戴森光束散焦 vs 聚焦）及当地冗余裁定。**全席位统一适用 `B1–B4` 天灾毁灭规则**（B1a/B1b 须手动或通过 L1 `b1_warning -> deflect_b1` 偏转；多恒星 B1b 真实摧毁 1 颗外围受创节点；B4 按星表前身星辐射壳抵达通量与 `存续 Lv.3+`/逐节点冗余永久剔除裁定，摇篮毁灭时向幸存节点重锚定核心），人类席位无隐形免死。 |
-| **当地与指挥核自毁指数（SDI）** | 区分结构分散拥挤度 $\Delta_{\text{density}}(N_{\text{worlds}}, N_{\text{stars,confirmed}})$（不依赖虚拟半径 $R_{\text{civ}}$）、凝聚威慑 $\Delta_{\text{conc}}$、脉冲、活跃恒星网跨度滞后应变（$R_{\text{active}}$ vs $R_{\text{sync}}$）、不衰减热过载与已抵达冲突摩擦并夹紧 `0..100%`；**全席位统一结算连续冷战自毁率 $\lambda_{100}(\mathrm{SDI})$ 与 $s_{\mathrm{raw}}\ge 100\%$ 临界崩解**（超距态触发外围永久叛离解列；否则消耗 `存续 Lv.3` 护盾或触发 `SDI_System_Collapse`）。 |
+| **发射星历 → 在途轨迹 → 毁伤与连续物理天灾** | 发射锚定当时已确认星历及其不确定度；抵达时按真实节点、受照注量（如戴森光束散焦 vs 聚焦）及当地冗余裁定。**全席位统一适用连续星域物理导出的 `B1–B4` 天灾律**（成熟太阳类比带 `B2=0`、`B1b` 百万年尺度、`B4` 严格仅由星表存在真实 `progenitor_unstable` 触发且无前身星则零爆发；年轻碎屑盘、活跃耀斑 M 矮星与银心/OB 星协对应高 $\mathcal I_{\text{sec}}$ 高发险区；B1a/B1b 须手动或通过 L1 `b1_warning -> deflect_b1` 偏转；多恒星 B1b 真实摧毁 1 颗外围受创节点；全银河仍以真实 `~1.5 次/100 sim yr` 产生全盘可观测远方超新星波壳），人类席位无隐形免死。 |
+| **当地与指挥核自毁指数（SDI）** | 区分结构分散拥挤度 $\Delta_{\text{density}}(N_{\text{worlds}}, N_{\text{stars,confirmed}})$（不依赖虚拟半径 $R_{\text{civ}}$）、**单行星高能生物圈闭环压力 $\Delta_{\text{conc}}$（$N_{\text{worlds}}=1$ 且 $K\ge K_{\text{crit}}$ 时随能级爬升，建地外据点立即泄压）**、脉冲、活跃恒星网跨度滞后应变（$R_{\text{active}}$ vs $R_{\text{sync}}$）、不衰减热过载与已抵达冲突摩擦并夹紧 `0..100%`；**全席位统一结算连续冷战自毁率 $\lambda_{100}(\mathrm{SDI})$ 与 $s_{\mathrm{raw}}\ge 100\%$ 临界崩解**（超距态触发外围永久叛离解列；否则消耗 `存续 Lv.3` 护盾或触发 `SDI_System_Collapse`）。 |
 | **热力学 → 蓄热／排热／过载** | 热沉按启动基准热功率定容 $Q_{\max}=180\times 0.994\,P_{\text{anchor}}$ 并按模拟秒热量积分守恒结算：恒定功率下蓄热 `180 sim yr` 满载后须切入 `vent_sink` 排热（恒定功率下精确耗时 **`44.73 sim yr`**），未切换而继续封印将按 `+1.5 百分点/sim yr` 累计**不衰减的 `E_heat_overload`** 直至切入排热或过载自毁；蓄热期仅压低 EM 辐射，中微子泄漏照常向外传播。 |
 
 ---
@@ -138,7 +138,7 @@ M3 席位设置提供「离线护航与加点托管」面板，玩家可配置�
 - **M3 万级分片 Checkpoint 与 WAL 恢复**：每个扇区分片通过分布式单写者租约（Lease）按序提交权威事件批次与稀疏增量表，定期写入带全球一致因果水位 `epoch_sim_ms` 的快照；节点宕机时可从最近邻区幽灵缓冲与 PostgreSQL Checkpoint 秒级接管重建。
 - **M4 长期异步世界留存与灭亡简报（不强制删档）**：
   - 不设全服大坍缩公投、局域系统公约、`monument_ascension` 或全服公共年鉴；
-  - 若席位因 `ColdWar_SelfDestruct`、`SDI_System_Collapse`、`B1–B4` 天灾或打击灭亡，所在扇区分片按实际物理规律停止其可控活动、在 Sparse Delta Overlay 中原地仅留存物理废墟／死域（及生前已建成的 `信标 Lv.4` 引力波信标设施），继续推进灭亡前已发出的在途波前，并生成事实性 `extinction.report` **灭亡简报**（含死因、灭绝时刻及满足 §7.4 条件时作为灭亡后告知机制的死后光锥回响），供玩家直接重开新摇篮；全银河其余席位无中断继续运行。[GDD §8.3](../../DESIGN.md#systems-and-constitution)
+  - 若席位因 `ColdWar_SelfDestruct`、`SDI_System_Collapse`、可致灭绝的 B 类天灾（`B1a`/`B1b`/`B2`/`B4`）或打击灭亡，所在扇区分片按实际物理规律停止其可控活动、在 Sparse Delta Overlay 中原地仅留存物理废墟／死域（及生前已建成的 `信标 Lv.4` 引力波信标设施），继续推进灭亡前已发出的在途波前，并生成事实性 `extinction.report` **灭亡简报**（含死因、灭绝时刻及满足 §7.4 条件时作为灭亡后告知机制的死后光锥回响），供玩家直接重开新摇篮；全银河其余席位无中断继续运行。[GDD §8.3](../../DESIGN.md#systems-and-constitution)
 
 ---
 
@@ -156,7 +156,7 @@ M3 席位设置提供「离线护航与加点托管」面板，玩家可配置�
 | 场景 | 最小自动化断言 |
 | --- | --- |
 | **多信使波壳消散与 EMCON 空心壳** | Tier 1 稳态 EM 波壳在 `400 ly`（$> R_{\text{diss,EM}}\approx 206.7\ \mathrm{ly}$）跌破 `F_diss` 彻底消散，即便开启 `Obs Lv.4` 盲扫亦不误检；`50 ly` 处开启 `stealth = 1e-4` 前发出的强光壳于 `t = 120` 仍在途穿过接收者（空心光壳），随后步入 $1.00c$ 扩张的沉默暗腔。 |
-| **中微子破壁与 GW $1/r$ 三角定标** | 距 `50 / 80 ly` 开 `blackbody_mimic`（`1e-4`）的 `Tier 2` 对 `Obs Lv.2` 全盲，而 `Obs Lv.3+` 经 $\kappa_\nu=0$ 中微子检出粗误差锥弱异常（且仅凭中微子无法精密锁星）；`3,000 ly` EM-dark `信标 Lv.4` 验证 $h\propto 1/r$ 线性应变，单星/双星 `Obs Lv.3` 仅出宽弧，汇齐 `N_stars_confirmed = 3` 基线后三角收敛锁定。 |
+| **中微子破壁与 GW $1/r$ 三角定标** | 距 `50 / 80 ly` 开 `blackbody_mimic`（`1e-4`）的 `Tier 2` 对 `Obs Lv.2` 全盲，而中微子经 $\kappa_\nu=0$ 穿透检出粗误差锥弱异常：`50 ly` 需 `Obs Lv.3`、`80 ly` 需 `Obs Lv.4`（Lv.3 作用距离上限约 `59.7 ly`，且仅凭中微子无法精密锁星）；`3,000 ly` EM-dark `信标 Lv.4` 验证 $h\propto 1/r$ 线性应变，单星/双星 `Obs Lv.3` 仅出宽弧，汇齐 `N_stars_confirmed = 3` 基线后三角收敛锁定。 |
 | **包含与泡内凝视 / 弱异常** | 噪底随 EM 波壳抵达变化（$\nu$/GW 免疫宿主光雾）。弱信号由凝视检出；`SNR = 2` 弱异常凭 `coarse_dir_vec3` 与 `dir_sigma_rad` 完成转向并积分锁定，无测距证据时保持二维方位锁。 |
 | **三角与链式拓扑** | 同一消息（4 ly 直达 vs 8 ly 经中继）在 **4.0／8.0 现实分钟**抵达，基线 4／8 光年。中继失效后链式组保留完好节点归属并继续当地运行，确认路径依报告或等待窗口更新。 |
 | **跨星远征回执与断联自治** | 距指挥核 4 ly 候选节点：纯返程光行下，成功与无回执组在第 **4.0 现实分钟**（`240 现实秒`）前指挥端视图一致，成功组在第 **4.0 现实分钟**确认；含 `0.10c` 定向远征舰（`2,400 现实秒`、`40.0 sim yr`）的完整切片于 **`2,640 现实秒`（`44.0 现实分钟`）** 确认（`2,760 秒` 超时）；另验证真实 Tier 1 初态经 `SeatCommand` 跨越 `4.22 / 8.5 ly` 稀疏邻星升 Tier 2，以及 `detach_outer_node` 转断联自治待机与 $1.00c$ 握手恢复。 |

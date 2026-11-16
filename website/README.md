@@ -61,4 +61,5 @@ server {
 - `authLogin`: `/auth/login`
 - `authRegister`: `/auth/register`
 - `wsGateway`: 生产环境 WSS 网关地址
+- `webClientDev` / `webClientDist`: 开发服务器或构建产物版游戏客户端地址（`/play/` 启动器据此跳转）
 - `iosAppStore` / `iosTestFlight` / `androidPlay` / `androidApk`: 正式发布后的客户端下载链接

@@ -39,27 +39,27 @@
 
 | 建议位置 | 交付物 |
 | --- | --- |
-| `packages/sim-core` | 双时钟换算、定向 $0.10c$ 远征队列、$1.00c$ 多信使波壳传播与消散、直达消息队列、节点接入／断联自治和快照恢复。 |
+| `packages/sim-core` | 双时钟换算、定向 $0.10c$ 远征（M1 为单槽在途记录）、$1.00c$ 多信使波壳传播与消散、直达消息队列、节点接入／断联自治和快照恢复。 |
 | `packages/contracts` | 版本化的远征/节点控制指令（含 `dispatch_expedition`、`set_node_coordination`）、波壳观测契约、受理结果与时间线帧校验。与 `SEAT-CONTRACT` 保持单一真源命名。 |
-| `scenarios/m1`、`apps/sim-cli` | 固定场景、时间断言、快照复跑和席位时间线导出。CLI 的开发诊断可查看权威事件，供客户端消费的文件只含席位视图。 |
+| `scenarios/m1`、`apps/sim-cli` | 固定场景夹具（`manifest.json`）、快照复跑和席位时间线导出（`artifacts/m1/*.json`）；时间断言位于 `packages/sim-core` 测试。CLI 导出的客户端消费文件只含席位视图，权威诊断事件不落盘给客户端。 |
 
-时间线包含 `schema_version`、`epoch_id`、`seat_id`、`kappa_t`、指令受理前的 `initial_snapshot` 和按时间排序的 `frames`。每帧给出 `t_sim_s`、席位视图版本及完整快照，首帧是第 0 秒受理后的状态。快照最低包含 `cradle_span_ly`、`active_sync_span_ly`、`expeditions_in_flight_count`、`controlled_node_count`、`known_reachable_node_count`、`r_persist`、`nodes`、`links`、`active_expeditions`、`pending_frontier_requests` 及多信使波壳观测切片。
+时间线包含 `schema_version`、`epoch_id`、`seat_id`、`kappa_t`、指令受理前的 `initial_snapshot` 和按时间排序的 `frames`。每帧给出 `t_sim_s`、席位视图版本及完整快照，首帧是第 0 秒受理后的状态。快照最低包含 `self.telemetry`（`cradle_span_ly`、`active_sync_span_ly`、`expeditions_in_flight_count`、`controlled_node_count`、`detached_autonomous_node_count`、`known_reachable_node_count`、`r_persist`）、`self.network`（`nodes`、`links`、`active_expeditions`、`pending_frontier_requests`）及 `lightcone.wavefronts` 多信使波壳观测切片。
 
 公开星表坐标经席位坐标变换后作为独立输入。原型可用第 0 秒席位视图的远征轨迹外推己方在途舰队，并按 `1.00c` 外球画出自发射时刻起扩散的信号波壳（与真实消散极限参考圈 `R_diss` 对照）。节点状态、标记与计数仅在合法回执帧生效。时间线格式供原型复跑，正式 HTTP/WSS 增量沿用同一席位视图契约。
 
 ### 2.3 自动化验收
 
-| 场景 | 通过条件 |
-| --- | --- |
-| 主场景 | 单程光行 240 现实秒（`4.0 sim yr`）。$0.10c$ 远征舰在 `2400` 秒（`40.0 sim yr`）抵达 B 并当地建站，A 在 `2640` 秒（`44.0 sim yr`）确认，前一秒（`2639` 秒）已确认节点数仍为 1。 |
-| 当地未接入 | 改变 B 的当地可用性，其余 A 端已知输入保持一致。与主场景比较，`2640` 秒前的席位字段与变更序列一致。当地结果没有送达时，超时（`2760` 秒）仍显示未确认。 |
-| B 接入、回执缺失 | 在指挥端先前的报告仍有效时令返程不可用。B 保留当地归属，A 到截止时仍只确认 A。可单独注入合法迟到回执，检查状态从未确认更新为已确认。 |
-| 授权迟到 | 延后发送授权，令远征舰先到。B 在授权抵达后才激活，回执从新的当地时刻计算。 |
-| 重试与乱序 | 相同请求 ID 重试只生成一次远征；同一回执重复投递只增加一次节点数；旧采样迟到后当前确认状态不回退。 |
-| 保存后继续 | 在 `2400` 秒处理完当地接入、回执仍在途时保存。恢复后仅确认一次，`2640` 秒及后续席位帧与连续运行一致。 |
-| 合法冷启动与断联恢复 | 从真实 Tier 1 初态（$K_0=0.56,N_{\text{worlds}}=1,N_{\text{stars}}=1$）经 `SeatCommand` 推进 `world_up`、`存续 Lv.1+` 并向 `4.22 ly` / `8.5 ly` 邻星发起 `0.10c` 定向远征（无硬性 `8 ly` 玻璃墙），确认回执解锁 $1.05$ 上限后待 $K\ge 1.10$ 升 Tier 2；另测 `detach_outer_node` 使外围星转断联自治待机与 `1.00c` 再并网握手恢复。 |
-| 多信使波壳、空心壳与消散闭环 | ① `400 ly` 处 Tier-1 EM 波壳跌破 `F_diss` 彻底消散（`Obs Lv.4` 亦不检出）；② `50 ly` 邻星开启 `stealth = 1e-4` 前射出的高功率 EM 波段继续以 `1.00c` 外传成空心波壳，中心向内扩张沉默暗腔；③ `Obs Lv.3+` 中微子通道穿过黑体拟态检出宽角弱异常（单凭中微子不锁定）；④ `SNR = 2` 弱异常经 `orient_telescope` 积分升二维锁；⑤ `信标 Lv.4` GW 按 $1/r$ 传播并在 `N_stars_confirmed >= 3` 下三角锁定。 |
-| 队列点数恢复与托管 | 队首因点数不足进入 `waiting_points` 或前置缺失进入 `waiting_prerequisite` 后，在无人工干预下待连续积分跨过费用门槛或跨星回执抵达时自动恢复开工，扣点与出队仅发生一次；验证 `allocation_plan` 按游标自动补入队列。 |
+| 场景 | 通过条件 | M1 实施状态 |
+| --- | --- | --- |
+| 主场景 | 单程光行 240 现实秒（`4.0 sim yr`）。$0.10c$ 远征舰在 `2400` 秒（`40.0 sim yr`）抵达 B 并当地建站，A 在 `2640` 秒（`44.0 sim yr`）确认，前一秒（`2639` 秒）已确认节点数仍为 1。 | | 已实现 |
+| 当地未接入 | 改变 B 的当地可用性，其余 A 端已知输入保持一致。与主场景比较，`2640` 秒前的席位字段与变更序列一致。当地结果没有送达时，超时（`2760` 秒）仍显示未确认。 | | 已实现 |
+| B 接入、回执缺失 | 在指挥端先前的报告仍有效时令返程不可用。B 保留当地归属，A 到截止时仍只确认 A。可单独注入合法迟到回执，检查状态从未确认更新为已确认。 | | 已实现 |
+| 授权迟到 | 延后发送授权，令远征舰先到。B 在授权抵达后才激活，回执从新的当地时刻计算。 | | 已实现 |
+| 重试与乱序 | 相同请求 ID 重试只生成一次远征；同一回执重复投递只增加一次节点数；旧采样迟到后当前确认状态不回退。 | | 已实现 |
+| 保存后继续 | 在 `2400` 秒处理完当地接入、回执仍在途时保存。恢复后仅确认一次，`2640` 秒及后续席位帧与连续运行一致。 | | 已实现 |
+| 合法冷启动与断联恢复 | 从真实 Tier 1 初态（$K_0=0.56,N_{\text{worlds}}=1,N_{\text{stars}}=1$）经 `SeatCommand` 推进 `world_up`、`存续 Lv.1+` 并向 `4.22 ly` / `5.5 ly` / `8.5 ly` 邻星发起 `0.10c` 定向远征（无硬性 `8 ly` 玻璃墙），确认回执解锁 $1.05$ 上限后待 $K\ge 1.10$ 升 Tier 2；另测 `detach_outer_node` 使外围星转断联自治待机与 `1.00c` 再并网握手恢复。 | | 部分实现：`detach_outer_node`／`sync` 已实现有测试；Tier 1 冷启动（`world_up`、`存续 Lv.1+`、升 Tier 2）与 K 成长延后 |
+| 多信使波壳、空心壳与消散闭环 | ① `400 ly` 处 Tier-1 EM 波壳跌破 `F_diss` 彻底消散（`Obs Lv.4` 亦不检出）；② `50 ly` 邻星开启 `stealth = 1e-4` 前射出的高功率 EM 波段继续以 `1.00c` 外传成空心波壳，中心向内扩张沉默暗腔；③ 中微子通道穿过黑体拟态检出宽角弱异常（`50 ly` 需 `Obs Lv.3`、`80 ly` 需 `Obs Lv.4`；单凭中微子不锁定）；④ `SNR = 2` 弱异常经 `orient_telescope` 积分升二维锁；⑤ `信标 Lv.4` GW 按 $1/r$ 传播并在 `N_stars_confirmed >= 3` 下三角锁定。 | | 部分实现：①②③ 已实现有测试；④ `orient_telescope` 凝视升锁与 ⑤ 三角锁定（当前仅非共线几何门）延后 |
+| 队列点数恢复与托管 | 队首因点数不足进入 `waiting_points` 或前置缺失进入 `waiting_prerequisite` 后，在无人工干预下待连续积分跨过费用门槛或跨星回执抵达时自动恢复开工，扣点与出队仅发生一次；验证 `allocation_plan` 按游标自动补入队列。 | | 延后（队列引擎未实现，见 FOUNDATION） |
 
 ## 3. M2 Web-First 原型与移动端适配
 
@@ -98,4 +98,4 @@
 
 Web-First 构建产物于 M3 接入海外域名的 Google OIDC 登录与 Anycast WSS，于 M4 通过 **Capacitor 包装为 iOS / Android 辅端原生包**（复用全部游戏场景与席位契约，并在 iOS 端对等接入 `Sign in with Apple`）。
 
-M3 复用 4 光年场景联调 **L1 确定性哨兵护航**与预留的 `ActorPrincipal` 指令总线：由 Web HUD 与服务端 3 槽白名单 L1 哨兵规则分别触发半径操作，验证待确认与回执一致；同时验证当 `external_agent` 尚未开放时网关正确拒绝并保留清晰扩展边界。[席位契约 §4](SEAT-CONTRACT.md#4-l1-离线确定性护航与-m4-外部-agent-扩展边界)
+M3 复用 4 光年场景联调 **L1 确定性哨兵护航**与预留的 `ActorPrincipal` 指令总线：由 Web HUD 与服务端 3 槽白名单 L1 哨兵规则分别触发定向远征／节点协同操作（v0.17 已废除半径操作），验证待确认与回执一致；同时验证当 `external_agent` 尚未开放时网关正确拒绝并保留清晰扩展边界。[席位契约 §4](SEAT-CONTRACT.md#4-l1-离线确定性护航与-m4-外部-agent-扩展边界)

@@ -41,4 +41,4 @@ flowchart BT
 
 `signals.ts` 提供无状态静止发射段的波壳内外边界、EM/中微子/GW 衰减、物理消散与非共线基线判定，并独立测试。移动发射源沿轨分段、真实接收机观测/凝视、完整多信使投影尚待接线；Web 不把示意波壳伪造为已抵达他者情报。
 
-当前契约将 `dispatch_expedition.target_node_id` 设为必填，只支持公开星表目标；方向导航尚未实现。文档中的解锁前置文字有 `N_worlds >= 2 || persist < 1` 与后文 `N_worlds >= 2 && persist >= 1` 表述不一致，本轮使用明确已解锁的 Tier 2 隔离夹具，不据此前置歧义实施真实 Tier 1 解锁规则。`M1–M2` 末段仍残留“半径操作”，实现遵循上文定向远征主流程。
+M1 子集仅受理 `dispatch_expedition{target_node_id, drive_mode?}`（`target_node_id` 必填、只支持公开星表目标）与 `set_node_coordination{node_id, mode}`；完整载荷中的 `origin_node_id`（出发枢纽选择）与 `local_dir_vec3`（M3+ 方向导航）本轮不受理。解锁前置在 GDD/SEAT-CONTRACT 已统一为「`N_worlds >= 2` 且 `存续 Lv.1` 后开放」（此前契约中的 `N_worlds >= 2 || persist < 1` 反写已修正）；本轮夹具仍使用明确已解锁的 Tier 2 隔离态，不据前置规则实施真实 Tier 1 解锁。`abandon_node`（自愿弃守）已补入席位契约指令清单（第 11 项），M1 子集暂不受理。`M1–M2` 末段旧文“半径操作”按上文定向远征主流程理解，已在本轮文档修订中更正。
