@@ -243,9 +243,10 @@ ul, ol {
   color: var(--ink2);
 }
 
-.btn-subtle:hover:not(:disabled) {
+.btn-subtle:hover:not(:disabled),
+.btn-subtle[aria-current="page"] {
   border-color: var(--selfDim);
-  color: var(--ink1);
+  color: var(--self);
   background: rgba(18, 26, 38, 0.7);
 }
 
