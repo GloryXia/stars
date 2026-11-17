@@ -17,6 +17,7 @@
 | **席位契约** | 同口径只读投影、局部 $SO(3)$ 坐标系、10 项幂等指令与 L1 / Agent 边界 | [席位契约规格（v0.17.0）](docs/specs/SEAT-CONTRACT.md) |
 | **首个开发切片** | 4 光年定向远征场景、双视角交互流程与 M1–M2 自动化验收 | [M1–M2 开发规格](docs/specs/M1-M2-FRONTIER.md) |
 | **界面与视听规范** | 航天遥测 HUD 布局、配色与面积配比、确定性图形语法与 `zh-CN`/`en` 双语规范 | [美学设计（Art Direction v0.3）](docs/specs/AESTHETICS.md) |
+| **跨端客户端基础** | 已实现的玩法切片、Web 分级表现与后续 Cocos 接入边界 | [客户端分层](docs/implementation/CLIENT-FOUNDATION.md) |
 | **当前实施基线** | 当前仓库代码边界、M1/M2 已实现范围与延后项说明 | [框架实施基线](docs/implementation/FOUNDATION.md) |
 | **静态官网与游玩说明** | 独立官网目录（含登录、注册、进入游戏、iOS/安卓下载预留路由及 `/guide/` 游玩说明） | [官网目录](website/README.md) |
 | **数值标定** | 人类历史生产力经验拟合、全席位统一大过滤器标定与 6 联曲线 | [数值标定说明](scripts/calibration/README.md) |
@@ -27,6 +28,7 @@
 ## 代码目录结构
 
 - `packages/sim-core`：无 UI/网络依赖的确定性仿真内核（双时钟、定向远征、波壳衰减、队列与事件队列）。
+- `packages/client-core`：与渲染器无关的会话、指令重试、文明进程与表现预算；当前由 Web 消费，后续接入 Cocos。
 - `packages/contracts`：席位视图 Schema、幂等指令信封与运行时校验（投影实现位于 `sim-core` 的 `projectSeat`）。
 - `packages/database`：PostgreSQL 稀疏增量持久化迁移与事务仓储。
 - `packages/ui-tokens` / `packages/i18n`：CSS 与 Three.js 共用的视觉令牌、`zh-CN`/`en` 双语字典。
@@ -34,5 +36,9 @@
 - `apps/web-client`：Web-First 主端（TypeScript + Three.js WebGL2 浮动原点 + 响应式 HUD）。
 - `apps/sim-cli` / `scenarios/m1`：M1 确定性时间线夹具与命令行复跑；`scripts/export-web-fixtures.mjs` 将 `artifacts/m1/*.json` 导出到 `apps/web-client/public/fixtures/` 供离线回放。
 - `infra/compose.yaml`：本地 PostgreSQL + Redis（Redis 仅预留）；`.github/workflows/check.yml` 跑 `pnpm check`；`.env.example` 列出 `DEV_AUTH_*` 与 `DATABASE_URL` 约定（生产 fail-closed）。
-- `apps/capacitor-shell`：M4 iOS / Android 原生壳端预留目录。
+- `apps/capacitor-shell`：旧移动壳端方案的占位目录；后续原生客户端改按 Cocos 路线验证，当前没有可安装 App。
 - `website/`：独立静态官网与玩法说明站点（零构建依赖，可直接静态托管）。
+
+## 本地启动
+
+只看回放：`pnpm install --frozen-lockfile` 后执行 `pnpm dev:web`。数据库、后端联调与测试命令见 [本地运行与验证](docs/implementation/DEVELOPMENT.md)。

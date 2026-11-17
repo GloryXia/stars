@@ -2,9 +2,9 @@ import Fastify from 'fastify';
 import { SeatNotFoundError } from '@stars/database';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { DEV_CONTEXT, HUMAN_SCOPES, seatCommandSchema, seatViewSchema } from '@stars/contracts';
-import { acceptCommand, advanceToRealSeconds, createSimulation, projectSeat, PUBLIC_CATALOG, restoreSimulation, SimError } from '@stars/sim-core';
+import { acceptCommand, advanceToRealSeconds, createSimulation, createCivilization, projectSeat, PUBLIC_CATALOG, restoreSimulation, SimError } from '@stars/sim-core';
 import { RepositoryError, type SeatRepository, type SeatTransaction, type StoredState } from './repository.js';
-export interface AppOptions {repository:SeatRepository; devToken:string; now?:()=>number; logger?:boolean}
+export interface AppOptions {repository:SeatRepository; devToken:string; now?:()=>number; logger?:boolean;newSeatMode?:'civilization'|'m1_fixture'}
 export const DEV_ACCOUNT_ID='00000000-0000-4000-8000-000000000003';
 export const DEV_PRINCIPAL={kind:'human' as const,subject_id:DEV_ACCOUNT_ID,granted_scopes:[...HUMAN_SCOPES]};
 // Stable serialization makes object-key order irrelevant to idempotency.
@@ -24,7 +24,7 @@ export function createApp(options:AppOptions){
     const saved=tx.snapshot as Partial<StoredState>;
     if(saved.simulation===undefined){
       if(Object.keys(saved).length)throw new Error('Unsupported persisted snapshot');
-      return {state:createSimulation({context:DEV_CONTEXT}),anchor_real_ms:now()};
+      return {state:(options.newSeatMode==='m1_fixture'?createSimulation:createCivilization)({context:DEV_CONTEXT}),anchor_real_ms:now()};
     }
     if(!Number.isFinite(saved.anchor_real_ms))throw new Error('Invalid snapshot clock');
     const state=restoreSimulation(saved.simulation);

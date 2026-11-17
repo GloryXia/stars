@@ -1,1 +1,1 @@
-{"name":"@stars/sim-cli","version":"0.0.0","private":true,"type":"module","scripts":{"start":"node --import tsx src/index.ts","typecheck":"tsc -p tsconfig.json","build":"tsc -p tsconfig.json"},"dependencies":{"@stars/sim-core":"workspace:*"}}
+{"name":"@stars/sim-cli","version":"0.0.0","private":true,"type":"module","scripts":{"start":"node --import tsx src/index.ts","typecheck":"tsc -p tsconfig.json","build":"tsc -p tsconfig.json"},"dependencies":{"@stars/contracts":"workspace:*","@stars/sim-core":"workspace:*"}}

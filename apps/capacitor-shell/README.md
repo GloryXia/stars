@@ -1,3 +1,5 @@
-# 移动壳端预留
+# 旧移动壳端方案占位
 
-M3 联调、M4 封装。当前没有原生工程或可安装 App；先复用 `apps/web-client` 的响应式 Web 产物。后续按架构文档接入 Capacitor、安全区、Haptics、OIDC PKCE 回跳及 Apple 登录。不要把开发固定席位令牌嵌入壳端。
+此目录没有原生工程或可安装 App。2026-11-17 路线调整为：先完成基础玩法与共享客户端业务层，再接入 Cocos Creator 构建 Web 与 iOS/Android 原生客户端，不继续以 Capacitor 作为默认移动交付路线。
+
+当前实现、跨端边界与后续验收见 [客户端分层](../../docs/implementation/CLIENT-FOUNDATION.md)。正式账户、安全区、触感与登录回跳仍待实现；不要在客户端嵌入开发固定席位令牌。

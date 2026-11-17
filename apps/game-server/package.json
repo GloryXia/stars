@@ -1,1 +1,21 @@
-{"name":"@stars/game-server","private":true,"version":"0.0.0","type":"module","scripts":{"dev":"node --env-file-if-exists=../../.env --import tsx --watch src/main.ts","start":"node --env-file-if-exists=../../.env --import tsx src/main.ts","typecheck":"tsc -p tsconfig.json","build":"tsc -p tsconfig.json"},"dependencies":{"@stars/contracts":"workspace:*","@stars/sim-core":"workspace:*","@stars/database":"workspace:*","fastify":"^5.6.2"}}
+{
+  "name": "@stars/game-server",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file-if-exists=../../.env --import tsx --watch src/main.ts",
+    "start": "node --env-file-if-exists=../../.env --import tsx src/main.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@stars/contracts": "workspace:*",
+    "@stars/sim-core": "workspace:*",
+    "@stars/database": "workspace:*",
+    "fastify": "^5.6.2"
+  },
+  "devDependencies": {
+    "@stars/client-core": "workspace:*"
+  }
+}

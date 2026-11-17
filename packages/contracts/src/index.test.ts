@@ -14,4 +14,15 @@ describe('public contract boundary', () => {
     expect(seatCommandSchema.safeParse({...command,command_id:DEV_CONTEXT.seat_id}).success).toBe(false);
     expect(seatCommandSchema.safeParse({...command,action:{type:'migrate_seed'}}).success).toBe(false);
   });
+  it('validates construction operations without accepting client prices or completion times',()=>{
+    const command={...DEV_CONTEXT,command_id:'019a8700-0000-7000-8000-000000000001',base_view_version:0,principal:{kind:'human',subject_id:'dev',granted_scopes:HUMAN_SCOPES}};
+    const action={type:'allocate_evolution_point',dimension:'persist'};
+    expect(seatCommandSchema.safeParse({...command,action}).success).toBe(true);
+    expect(seatCommandSchema.safeParse({...command,action:{...action,queue_op:'remove_at',queue_index:0}}).success).toBe(true);
+    for (const invalid of [
+      {...action,queue_op:'remove_at'}, {...action,queue_index:0},
+      {...action,queue_op:'remove_at',queue_index:5}, {...action,queue_op:'remove_at',queue_index:0.5},
+      {...action,dimension:'unknown'}, {...action,price:0}, {...action,target_level:4}, {...action,finishes_sim_ms:0},
+    ]) expect(seatCommandSchema.safeParse({...command,action:invalid}).success).toBe(false);
+  });
 });

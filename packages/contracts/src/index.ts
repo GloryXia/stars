@@ -1,5 +1,5 @@
 import { z } from 'zod';
-export const SCHEMA_VERSION = '0.2.0' as const;
+export const SCHEMA_VERSION = '0.7.0' as const;
 export const KAPPA_T = 525_960;
 export const SIM_SECONDS_PER_YEAR = 31_557_600;
 const finite = z.number().finite();
@@ -11,12 +11,48 @@ export const capabilityScopeSchema = z.enum(['READ_SEAT_VIEW','CONTROL_SPHERE_ST
 export const HUMAN_SCOPES = capabilityScopeSchema.options;
 export const actorPrincipalSchema = z.object({kind:z.enum(['human','l1_reflex','internal_ai','external_agent']),subject_id:z.string().min(1).max(200),granted_scopes:z.array(capabilityScopeSchema).max(5)}).strict();
 export type ActorPrincipal = z.infer<typeof actorPrincipalSchema>;
+export const evolutionDimensionSchema = z.enum(['obs','beacon','stealth','strike','persist','world_up','k_tier_up']);
+export type EvolutionDimension = z.infer<typeof evolutionDimensionSchema>;
+const techLevel = version.max(4);
+export const techLevelsSchema = z.object({obs:techLevel,beacon:techLevel,stealth:techLevel,strike:techLevel,persist:techLevel}).strict();
+export const buildQueueItemSchema = z.object({dimension:evolutionDimensionSchema,queued_at_sim_s:nonnegative,status:z.enum(['queued','waiting_points','waiting_prerequisite'])}).strict();
+export const activeConstructionSchema = z.object({dimension:evolutionDimensionSchema,target_level:version.min(1).max(4),rem_sim_s:nonnegative,rem_real_s:nonnegative}).strict();
+export const allocationPlanItemSchema = z.object({dimension:evolutionDimensionSchema,target_level:version.min(1).max(4).optional(),min_k:finite.min(0.56).max(2).optional()}).strict().superRefine((item,ctx)=>{
+  if(item.target_level!==undefined && ((item.dimension==='world_up' && item.target_level<2) || (item.dimension==='k_tier_up' && (item.target_level<2 || item.target_level>3))))ctx.addIssue({code:'custom',message:'Invalid construction target level'});
+});
+export const allocationPlanConfigSchema = z.object({enabled:z.boolean(),template_id:z.string().min(1).max(100).optional(),items:z.array(allocationPlanItemSchema).max(20)}).strict();
+export const allocationPlanSchema = allocationPlanConfigSchema.extend({cursor_index:version.max(20)}).superRefine((plan,ctx)=>{
+  if(plan.cursor_index>plan.items.length)ctx.addIssue({code:'custom',message:'Cursor exceeds plan length'});
+});
+export type AllocationPlanConfig = z.infer<typeof allocationPlanConfigSchema>;
+export const instabilityEventSchema=z.object({kind:z.enum(['local_crisis','secession','shield']),t_sim_s:nonnegative,k_lost:nonnegative.optional()}).strict();
+export const extinctionReportSchema=z.discriminatedUnion('extinct',[
+  z.object({extinct:z.literal(false),posthumous_callbacks:z.array(z.never())}).strict(),
+  z.object({extinct:z.literal(true),cause:z.enum(['ColdWar_SelfDestruct','SDI_System_Collapse']),t_extinct_sim_s:nonnegative,posthumous_callbacks:z.array(z.never())}).strict(),
+]);
+export const evolutionTelemetryShape = {
+  instability:z.object({enabled:z.boolean(),crisis_count:version,shield_available:z.boolean(),last_event:instabilityEventSchema.nullable()}).strict(),
+  sdi_mode:z.enum(['fixed','dynamic']),sdi_sampled_sim_s:nonnegative.nullable(),
+  sdi_total:nonnegative.max(100),sdi_raw:finite,r_sync_ly:nonnegative.nullable(),
+  sdi_breakdown:z.object({involution:nonnegative,concentration:nonnegative,colony:nonnegative,lag:nonnegative,lag_strain_u:nonnegative,tier_tech:finite,pulse:finite,fixed:finite,heat_overload:nonnegative,overlap_arrived:nonnegative}).strict(),
+  k_value:finite.min(0.56).max(2),k_max_confirmed:finite.min(0.56).max(2),n_eff_stars:finite.min(1),stage:z.enum(['single_planet','multi_planet','multi_star']),
+  k_tier:version.min(1).max(3),n_worlds:version.min(1).max(4),tech_levels_5:techLevelsSchema,
+  active_construction:activeConstructionSchema.nullable(),build_queue:z.array(buildQueueItemSchema).max(5),
+  allocation_plan:allocationPlanSchema,
+  evo_points_avail:nonnegative,evo_points_earned_total:nonnegative,
+  v_e_rate_per_real_h:nonnegative,v_e_rate_per_sim_yr:nonnegative,
+  pi_productivity:z.object({total:nonnegative,pi_exp:nonnegative,xi_stochastic_factor:nonnegative}).strict(),
+};
 // M1 currently resolves a disclosed catalog target; direction-only navigation is deferred.
 export const seatActionSchema = z.discriminatedUnion('type',[
   z.object({type:z.literal('dispatch_expedition'),target_node_id:z.string().min(1).max(128),drive_mode:z.literal('standard_010c').optional()}).strict(),
-  z.object({type:z.literal('set_node_coordination'),node_id:z.string().min(1).max(128),mode:z.enum(['detach_outer_node','sync'])}).strict()
+  z.object({type:z.literal('set_node_coordination'),node_id:z.string().min(1).max(128),mode:z.enum(['detach_outer_node','sync'])}).strict(),
+  z.object({type:z.literal('allocate_evolution_point'),dimension:evolutionDimensionSchema,queue_op:z.enum(['enqueue','remove_at']).optional(),queue_index:version.max(4).optional()}).strict(),
+  allocationPlanConfigSchema.extend({type:z.literal('configure_allocation_plan')})
 ]);
-export const seatCommandSchema = seatContextSchema.extend({command_id:z.string().uuid().refine(v=>v[14]==='7','UUIDv7 required'),base_view_version:version,principal:actorPrincipalSchema,action:seatActionSchema}).strict();
+export const seatCommandSchema = seatContextSchema.extend({command_id:z.string().uuid().refine(v=>v[14]==='7','UUIDv7 required'),base_view_version:version,principal:actorPrincipalSchema,action:seatActionSchema}).strict().superRefine(({action},ctx)=>{
+  if(action.type==='allocate_evolution_point' && ((action.queue_op==='remove_at') !== (action.queue_index!==undefined)))ctx.addIssue({code:'custom',path:['action','queue_index'],message:'queue_index is required only for remove_at'});
+});
 export type SeatCommandEnvelope = z.infer<typeof seatCommandSchema>;
 export const commandResultSchema = z.object({command_id:z.string().uuid(),accepted:z.literal(true),exp_id:z.string().optional(),view_version:version}).strict();
 export type CommandResult = z.infer<typeof commandResultSchema>;
@@ -40,11 +76,11 @@ export const observationSchema = z.discriminatedUnion('kind',[
 // A versioned M1 subset, not a claim that the complete M3 telemetry is implemented.
 export const seatViewSchema = seatContextSchema.extend({
   schema_version:z.literal(SCHEMA_VERSION),view_version:version,t_sim_s:nonnegative,
-  'self.telemetry':z.object({cradle_span_ly:nonnegative,active_sync_span_ly:nonnegative,expeditions_in_flight_count:version,controlled_node_count:version,detached_autonomous_node_count:version,known_reachable_node_count:version,r_persist:nonnegative}).strict(),
+  'self.telemetry':z.object({...evolutionTelemetryShape,cradle_span_ly:nonnegative,active_sync_span_ly:nonnegative,expeditions_in_flight_count:version,controlled_node_count:version,detached_autonomous_node_count:version,known_reachable_node_count:version,r_persist:nonnegative}).strict(),
   'self.network':z.object({nodes:z.array(nodeReportSchema),links:z.array(linkReportSchema),active_expeditions:z.array(expeditionSchema),pending_frontier_requests:z.array(frontierRequestSchema)}).strict(),
   'lightcone.wavefronts':z.array(observationSchema),
   'sentinel.reflex_rules':z.object({max_slots:z.literal(3),trigger_mode:z.enum(['offline_only','always_armed']),grace_period_real_s:nonnegative,armed_now:z.boolean(),active_rules:z.array(z.never())}).strict(),
-  'extinction.report':z.object({extinct:z.literal(false),posthumous_callbacks:z.array(z.never())}).strict()
+  'extinction.report':extinctionReportSchema
 }).strict();
 export type SeatViewProjection = z.infer<typeof seatViewSchema>;
 export const publicCatalogSchema = z.array(z.object({catalog_id:z.string(),label:z.string(),local_pos_vec3:vec3,spectral_type:z.enum(['O','B','A','F','G','K','M'])}).strict());

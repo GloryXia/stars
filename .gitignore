@@ -12,3 +12,6 @@ artifacts/
 __pycache__/
 *.tsbuildinfo
 apps/web-client/public/fixtures/
+
+.playwright-cli/
+output/playwright/

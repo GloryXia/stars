@@ -1,5 +1,8 @@
 # 《光锥之外》技术架构
 
+> 2026-11-17 客户端路线调整：先完成基础玩法与共享 `client-core`，再接入 Cocos Creator 发布 Web 与 iOS/Android 原生包；所有受支持平台保留基础 3D，Web 与 App 均按设备能力增减特效和渲染精度，规则和进度一致。当前尚无 Cocos 工程，现有 Three.js/DOM Web 为过渡实现。下文 Capacitor 与客户端技术栈描述保留为原阶段设计，后续实施以 [客户端分层](../implementation/CLIENT-FOUNDATION.md) 为准；服务端权威、协议与因果隔离约束不变。
+
+
 设计基线为 **GDD v0.17.0**。本文定义 M1–M4 的模块边界、**银河系尺度（100,000 ly）万级同服架构**、**海外 Web-First + Google 登录交付链路**、数据流与验收条件。规则与数值查 GDD，席位投影、幂等指令与预留 Agent 扩展总线查配套席位契约；技术选型、内部数据结构与待定口径默认方案属于实施提案。[GDD §9](../../DESIGN.md#implementation-and-acceptance) · [席位契约规格](SEAT-CONTRACT.md)
 
 ---

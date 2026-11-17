@@ -16,6 +16,7 @@
     "db:migrate": "pnpm --filter @stars/database migrate",
     "db:seed": "pnpm --filter @stars/database seed",
     "sim:m1": "pnpm --filter @stars/sim-cli start",
+    "sim:growth": "pnpm --filter @stars/sim-cli exec node --import tsx src/growth.ts",
     "fixtures": "pnpm sim:m1 && node scripts/export-web-fixtures.mjs",
     "dev:web": "pnpm fixtures && pnpm --filter @stars/web-client dev"
   },
